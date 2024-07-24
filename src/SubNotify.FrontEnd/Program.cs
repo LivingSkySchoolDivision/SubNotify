@@ -1,4 +1,4 @@
-using SubNotify_FrontEnd.Components;
+using SubNotify.FrontEnd.Components;
 
 var builder = WebApplication.CreateBuilder(args);
 

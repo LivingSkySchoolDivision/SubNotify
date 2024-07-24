@@ -10,5 +10,7 @@ public class GroupPermission : IGUIDable
     public bool CanRequestSubs { get; set; }
     public bool CanManageAvailableSubs { get; set; }
     public bool CanManagePermissions { get; set; }
+    public bool CanSeeAllSchools { get; set; }
+    public List<Guid> SchoolGUIDs { get; set; } = new List<Guid>();
     
 }

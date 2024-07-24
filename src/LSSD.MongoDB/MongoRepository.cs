@@ -7,6 +7,7 @@ using MongoDB.Bson;
 using MongoDB.Bson.IO;
 using MongoDB.Driver.Linq;
 using System.Linq;
+using SubNotify.Core; 
 
 namespace LSSD.MongoDB
 {

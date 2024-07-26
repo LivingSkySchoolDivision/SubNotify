@@ -13,8 +13,16 @@
 </head>
 
 <body>
-    <Routes />
-    <script src="_framework/blazor.web.js"></script>
-</body>
+    <AuthorizeView>
+        <Authorized>
+            <Routes />
+            <script src="_framework/blazor.web.js"></script>
+        </Authorized>
+        <NotAuthorized>
+            <RedirectToLogin />
+        </NotAuthorized>
+    </AuthorizeView>
+    
 
+</body>
 </html>

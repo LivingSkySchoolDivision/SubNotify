@@ -1,13 +1,20 @@
 ﻿@inherits LayoutComponentBase
 
 <div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
-
     <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+        <div class="header" style="text-align: left;">
+            <h1><a href="/" style="color: inherit; text-decoration: none;">Substitute Secretary Notification System</a></h1>
+
+            <div style="position: absolute; top: 0; right: 0; padding:5px;">
+                <AuthorizeView>
+                    <Authorized>
+                        Logged on as <b>@context.User.Identity.Name</b>
+                    </Authorized>
+                    <NotAuthorized>
+                        <i>NOT LOGGED ON</i>>
+                    </NotAuthorized>
+                </AuthorizeView>
+            </div>
         </div>
 
         <article class="content px-4">

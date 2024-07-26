@@ -3,34 +3,100 @@
 
 <PageTitle>Home</PageTitle>
 
+<style type="text/css">
+    .main_nav_button {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        width: 200px;
+        height: 200px;
+        border-radius: 15px;
+        margin: 10px;
+    }
+
+    .main_nav_button_icon {
+        width: 50%;
+        height: 300px;
+    }
+
+    .main_nav_button_icon img {
+        width: 100%;
+    }
+
+    .main_nav_button_text {
+        width: 100%;
+        height: 200px;
+        font-size: 12pt;
+        font-weight: bold;
+        text-align: center;
+        padding: 10px;
+    }
+
+    .main_nav_container {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .home_page_container {
+        max-width: 1000px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    a {
+        text-decoration: none;
+    }
+</style>
+
 <AuthorizeView>
      <Authorized>
-         <h1>Hello, @context.User.Identity.Name!</h1>
+        <br/><br/><br/>
+        <div class="home_page_container">
+            <div style="text-align: center;">
+                <h1 style="font-weight: bold; border-bottom: 1px solid #C0C0C0;">Main Menu</h1>
+            </div>
+            <div class="main_nav_container">
 
-         <p>
-            Your claims are:
+                <a href="/Notify">
+                    <div class="main_nav_button">
+                        <div class="main_nav_button_icon"><img src="/img/substitute.svg"></div>
+                        <div class="main_nav_button_text">Notify SIS of an upcoming substitute secretary</div>
+                    </div>
+                </a>
 
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Claim Label</th>
-                        <th>Claim Value</th>
-                        <th>Claim Issuer</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach(Claim claim in context.User.Claims) 
-                    {
-                        <tr>
-                            <td>@(claim.Type)</td>
-                            <td>@(claim.Value.ToString())</td>
-                            <td>@(claim.Issuer)</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-         </p>
-  
+                <a href="/SubList">
+                    <div class="main_nav_button">
+                        <div class="main_nav_button_icon"><img src="/img/list.svg"></div>
+                        <div class="main_nav_button_text">View and request changes to the available sub list</div>
+                    </div>
+                </a>
+<!---->
+                <a href="/ManagePermissions">
+                    <div class="main_nav_button">
+                        <div class="main_nav_button_icon"><img src="/img/security.svg"></div>
+                        <div class="main_nav_button_text">Manage permissions for this site</div>
+                    </div>
+                </a>
+
+                <a href="/ManageSchools">
+                    <div class="main_nav_button">
+                        <div class="main_nav_button_icon"><img src="/img/school.svg"></div>
+                        <div class="main_nav_button_text">Manage schools for this site</div>
+                    </div>
+                </a>
+
+<!---->
+            </div>
+
+            <p>This menu needs to adapt to the user's permissions.<ul><li>Don't show "Manage permissions" unless the user has the right permissions</li><li>Don't show "Manage Schools" unless the user has the right permissions</li><li>Don't show "Notify" and "Request" if the user has no school associations</li></ul></p>
+
+        </div>
+
+
+
      </Authorized>
      <NotAuthorized>
          <p>Not Authorized</p>

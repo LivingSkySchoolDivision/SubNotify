@@ -94,3 +94,28 @@ main {
         right: 0.75rem;
         top: 0.5rem;
     }
+
+    
+.header {
+    border-bottom: 1px solid rgba(0,0,0,0.2);
+    background-color: tomato;    
+    text-align: center;
+    padding: 5px;
+    color: white;
+}
+
+.header h1 {
+    padding: 0;
+    margin: 0;
+    font-weight: bold;
+    font-size: 14pt;
+}
+
+.header_user_info {
+    font-size: 75%;
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 10px;
+    color: rgba(0,0,0,0.2);
+}

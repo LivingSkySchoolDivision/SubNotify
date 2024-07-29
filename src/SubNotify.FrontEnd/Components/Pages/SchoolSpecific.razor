@@ -1,0 +1,115 @@
+@page "/EditSchool/{schoolid}"
+@using SubNotify.Core
+@using SubNotify.FrontEnd.Services
+
+@code {
+    
+    [Inject]
+    SchoolService _repo { get; set; }
+    
+    [Inject]
+    NavigationManager NavigationManager { get; set; }
+
+    [Parameter]
+    public string schoolid { get; set; }
+    School? school = null;
+
+    protected override void OnInitialized()
+    {
+        if (schoolid != (new Guid()).ToString()) {
+            school = _repo.Get(schoolid);
+        } else {
+            school = new School();
+        }
+    }
+
+    protected void HandleInValidSubmit()
+    {
+        // Do nothing
+    }
+
+    protected void HandleValidSubmit()
+    {   
+        if (school != null)
+        {     
+            // Sanitize
+            school.Name = school.Name.Trim();
+
+            // Save
+            _repo.InsertOrUpdate(school);
+        }
+        // Navigate back 
+        NavigationManager.NavigateTo("/ManageSchools");
+    }
+
+    protected void OnClick_Delete(School school)
+    {
+        // Save
+        _repo.Delete(school);
+        
+        // Navigate back 
+        NavigationManager.NavigateTo("/ManageSchools");
+    }
+
+    protected void OnClick_Back()
+    {        
+        // Navigate back 
+        NavigationManager.NavigateTo("/ManageSchools");
+    }
+
+}
+
+<AuthorizeView Context="user">
+    <Authorized>
+      
+    <div class="page_container">
+
+    @if(school != null) {
+        <EditForm FormName="SchoolEditForm" Model="@school" OnValidSubmit="@HandleValidSubmit" OnInvalidSubmit="@HandleInValidSubmit">
+        <div class="form-group">
+            <div class="row">
+                <div class="col-sm-3">ID (Read Only)</div>
+                <div class="col-sm-6">@((school.Id.ToString() == (new Guid()).ToString()) ? "NEW" : @school.Id.ToString())</div>
+            </div>
+
+            <br/>            
+            <div class="form-group row">
+                <label for="resourceName" class="col-sm-3">Name: </label>
+                <InputText id="resourceName" class="form-control col-sm-8" @bind-Value="@school.Name"></InputText>
+                <ValidationMessage class="offset-sm-3 col-sm-68" For="@(() => school.Name)" />
+            </div>
+
+            <br/>
+            <div class="form-group row">                
+                <div class="col-sm-1">
+                    <InputCheckbox id="resourceName" @bind-Value="@school.IsEnabled"></InputCheckbox>
+                </div>
+                <label for="resourceName" class="col-sm-3">Enabled / Visible</label>
+                <ValidationMessage class="col-sm-7" For="@(() => school.Name)" />
+            </div>
+        </div>       
+
+        <br/>
+        <div class="form-group">
+            <div class="form-row row">  
+                <div class="col-sm-5">
+                    <button type="submit" class="btn btn-primary btn-block">Save</button>
+                </div>
+                <div class="col-sm-2">
+                    @if(school.Id.ToString() != (new Guid()).ToString()) {
+                        <button type="button" class="btn btn-danger btn-block" @onclick="() => OnClick_Delete(school)">Delete</button>
+                    }
+                </div>
+                <div class="col-sm-5" style="text-align: right;">                    
+                    <button type="button" class="btn btn-secondary btn-block" @onclick="OnClick_Back">Back</button>                    
+                </div>
+            </div>
+        </div>
+
+        </EditForm>
+    } else {
+        <i>Object not found</i>
+    }
+</div>
+    </Authorized>
+</AuthorizeView>

@@ -14,4 +14,9 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="8.0.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\SubNotify.Core\SubNotify.Core.csproj" />
+    <ProjectReference Include="..\LSSD.MongoDB\LSSD.MongoDB.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -17,6 +17,9 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.JsonWebTokens;
+using LSSD.MongoDB;
+using SubNotify.Core;
+using SubNotify.FrontEnd.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -70,6 +73,14 @@ builder.Services.AddRazorComponents()
 // Add services for dependency injection
 // example:
 //  services.AddScoped<IRegistrationRepository<School>, MongoRepository<School>>();
+IConfiguration Configuration = new ConfigurationBuilder()
+                    .AddEnvironmentVariables()
+                    .AddUserSecrets<Program>()
+                    .Build();
+builder.Services.AddSingleton<MongoDbConnection>(x => new MongoDbConnection(Configuration.GetConnectionString("Internal")));
+
+builder.Services.AddSingleton<IRepository<School>, MongoRepository<School>>();
+builder.Services.AddSingleton<SchoolService>();
 
 var app = builder.Build();
 

@@ -1,5 +1,53 @@
 @page "/ManageSchools"
+@using SubNotify.Core
+@using SubNotify.FrontEnd.Services
 
-<h1>Manage Schools</h1>
+@code {
+    [Inject]
+    SchoolService _repo { get; set; }
 
-List of schools here, with the ablity to add/remove
+    List<School> AllSchools = new List<School>();
+
+    protected override void OnInitialized()
+    {
+        AllSchools = _repo.GetAll().ToList();        
+    }
+}
+
+<AuthorizeView Context="user">
+    <Authorized>      
+        <div class="page_container">
+            <h1>Schools</h1>
+            <a href="/">Back to home</a>
+
+            <br/><br/>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th width="40%">Name</th>
+                        <th width="10%">Is Enabled</th>
+                        <th width="30%">GUID</th>
+                    </tr>
+                </thead>
+
+            @foreach(School school in AllSchools.OrderBy(x => x.Name)) 
+            {
+                <tr>
+                    <td style="padding: 5px;"><a href="EditSchool/@(school.Id)">@(school.Name)</a></td>
+                    <td style="padding: 5px;">@(school.IsEnabled ? "Yes" : "NO (HIDDEN)")</td>
+                    <td style="padding: 5px;">@(school.Id)</td>
+                </tr>
+            }
+
+            </table>
+            <div class="row">
+                <div class="col-sm-12" style="text-align: left;">                    
+                    <i>Total: @(AllSchools.Count)</i>
+                    <br/>
+                    <a href="/EditSchool/@(new Guid())">Add New School</a>
+                </div>
+            </div>
+        </div>
+        <br/><br/><br/><br/><br/>
+    </Authorized>
+</AuthorizeView>

@@ -5,19 +5,21 @@
 @code {
     
     [Inject]
-    SchoolService _repo { get; set; }
+    SchoolService? _repo { get; set; }
     
     [Inject]
-    NavigationManager NavigationManager { get; set; }
+    NavigationManager? NavigationManager { get; set; }
 
     [Parameter]
-    public string schoolid { get; set; }
+    public string? schoolid { get; set; }
     School? school = null;
 
     protected override void OnInitialized()
     {
-        if (schoolid != (new Guid()).ToString()) {
-            school = _repo.Get(schoolid);
+        if (school != null) {
+            // Do nothing
+        } else if (schoolid != (new Guid()).ToString()) {
+            school = _repo?.Get(schoolid);
         } else {
             school = new School();
         }
@@ -36,25 +38,25 @@
             school.Name = school.Name.Trim();
 
             // Save
-            _repo.InsertOrUpdate(school);
+            _repo?.InsertOrUpdate(school);
         }
         // Navigate back 
-        NavigationManager.NavigateTo("/ManageSchools");
+        NavigationManager?.NavigateTo("/ManageSchools");
     }
 
     protected void OnClick_Delete(School school)
     {
         // Save
-        _repo.Delete(school);
+        _repo?.Delete(school);
         
         // Navigate back 
-        NavigationManager.NavigateTo("/ManageSchools");
+        NavigationManager?.NavigateTo("/ManageSchools");
     }
 
     protected void OnClick_Back()
     {        
         // Navigate back 
-        NavigationManager.NavigateTo("/ManageSchools");
+        NavigationManager?.NavigateTo("/ManageSchools");
     }
 
 }

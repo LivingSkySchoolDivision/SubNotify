@@ -43,9 +43,13 @@ namespace SubNotify.FrontEnd.Services
             _repository.Update(school);
         }
 
-        public School Get(string id)
+        public School Get(string? id)
         {
-            return _repository.GetById(id);
+            if (id == null) {
+                throw new Exception("Id cannot be null");
+            } else {
+                return _repository.GetById(id);
+            }
         }
     }
 }

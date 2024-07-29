@@ -8,7 +8,7 @@
             <div style="position: absolute; top: 0; right: 0; padding:5px;">
                 <AuthorizeView>
                     <Authorized>
-                        Logged on as <b>@context.User.Identity.Name</b>
+                        Logged on as <b>@(context?.User?.Identity?.Name ?? "INVALID USER")</b>
                     </Authorized>
                     <NotAuthorized>
                         <i>NOT LOGGED ON</i>>

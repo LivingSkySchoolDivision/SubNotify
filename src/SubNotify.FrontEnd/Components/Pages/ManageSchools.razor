@@ -4,13 +4,13 @@
 
 @code {
     [Inject]
-    SchoolService _repo { get; set; }
+    SchoolService? _repo { get; set; }
 
     List<School> AllSchools = new List<School>();
 
     protected override void OnInitialized()
     {
-        AllSchools = _repo.GetAll().ToList();        
+        AllSchools = _repo?.GetAll().ToList() ?? new List<School>();        
     }
 }
 

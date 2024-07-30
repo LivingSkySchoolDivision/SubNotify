@@ -26,7 +26,6 @@
                     <tr>
                         <th width="40%">Name</th>
                         <th width="10%">Is Enabled</th>
-                        <th width="30%">GUID</th>
                     </tr>
                 </thead>
 
@@ -34,8 +33,7 @@
             {
                 <tr>
                     <td style="padding: 5px;"><a href="EditSchool/@(school.Id)">@(school.Name)</a></td>
-                    <td style="padding: 5px;">@(school.IsEnabled ? "Yes" : "NO (HIDDEN)")</td>
-                    <td style="padding: 5px;">@(school.Id)</td>
+                    <td style="padding: 5px;">@(school.IsEnabled ? "Yes" : "NO (HIDDEN)")</td>                    
                 </tr>
             }
 

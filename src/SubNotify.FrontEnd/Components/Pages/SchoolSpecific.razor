@@ -16,9 +16,7 @@
 
     protected override void OnInitialized()
     {
-        if (school != null) {
-            // Do nothing
-        } else if (schoolid != (new Guid()).ToString()) {
+        if (schoolid != (new Guid()).ToString()) {
             school = _repo?.Get(schoolid);
         } else {
             school = new School();

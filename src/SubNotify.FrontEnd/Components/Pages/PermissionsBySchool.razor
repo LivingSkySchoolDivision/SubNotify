@@ -1,0 +1,61 @@
+@page "/PermissionsBySchool"
+@using SubNotify.Core
+@using SubNotify.FrontEnd.Services
+@using SubNotify.FrontEnd.Components
+@using System.Security.Claims
+
+
+@code {
+    [Inject]
+    GroupPermissionService? _repo { get; set; }
+
+    [Inject]
+    SchoolService? _schoolRepo { get; set; }
+
+    List<GroupPermission> AllPermissions = new List<GroupPermission>();
+    List<School> AllSchools = new List<School>();
+
+    protected override void OnInitialized()
+    {
+        AllPermissions = _repo?.GetAll().ToList() ?? new List<GroupPermission>();
+        AllSchools = _schoolRepo?.GetAll().OrderBy(x => x.Name).ToList() ?? new List<School>();
+    }
+}
+
+<PageTitle>Permissions - Full List</PageTitle>
+
+<AuthorizeView>
+     <Authorized>
+        <div>
+            <h1>Permissions - By School</h1>
+            <a href="/ManagePermissions">Back to permissions menu</a> | <a href="/Permission/@(new Guid())">Add New Permission</a>
+
+            @foreach(School school in AllSchools)
+            {
+                List<GroupPermission> schoolPerms = AllPermissions.Where(x => (x.SchoolGUIDs.Contains(school.Id)) || (x.CanSeeAllSchools)).ToList();
+
+                <br/><br/>
+                <br/><br/>
+                <h3>@school.Name</h3>
+                <PermissionsTable Permissions="@schoolPerms" AllowEdit="true" />
+            }
+
+            <br/><br/>
+            <br/><br/>
+            <h2>No valid school associations</h2>
+            @{
+                List<GroupPermission> orphanedPerms = new List<GroupPermission>();
+            }
+            <PermissionsTable Permissions="@orphanedPerms" AllowEdit="true" />
+
+
+        </div>
+        <br/><br/><br/><br/><br/>
+     </Authorized>
+     <NotAuthorized>
+         <p>Not Authorized</p>
+     </NotAuthorized>
+ </AuthorizeView>
+
+
+

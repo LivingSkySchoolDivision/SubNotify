@@ -1,0 +1,88 @@
+@page "/PermissionsByPermission"
+@using SubNotify.Core
+@using SubNotify.FrontEnd.Services
+@using System.Security.Claims
+
+
+@code {
+    [Inject]
+    GroupPermissionService? _repo { get; set; }
+
+    List<GroupPermission> AllPermissions = new List<GroupPermission>();
+
+    protected override void OnInitialized()
+    {
+        AllPermissions = _repo?.GetAll().ToList() ?? new List<GroupPermission>();
+    }
+}
+
+<PageTitle>Permissions - Full List</PageTitle>
+
+<AuthorizeView>
+     <Authorized>
+        <div>
+            <h1>Permissions - Administrative Permissions</h1>
+            <a href="/ManagePermissions">Back to permissions menu</a> | <a href="/Permission/@(new Guid())">Add New Permission</a>
+            
+            <br/><br/><br/><br/>
+            <h3>Can manage sub list</h3>
+            @{
+                List<GroupPermission> canManageSubs = AllPermissions.Where(x => x.CanManageSubList).ToList();
+            }
+            <PermissionsTable Permissions="@canManageSubs" AllowEdit="true" ShowSchoolList="true" />
+
+
+            <br/><br/><br/><br/>
+            <h3>Can manage permissions</h3>
+            @{
+                List<GroupPermission> canManagePermissions = AllPermissions.Where(x => x.CanManagePermissions).ToList();
+            }
+            <PermissionsTable Permissions="@canManagePermissions" AllowEdit="true" ShowSchoolList="true" />
+
+
+            <br/><br/><br/><br/>
+            <h3>Can see all schools</h3>
+            @{
+                List<GroupPermission> canSeeallSchools = AllPermissions.Where(x => x.CanSeeAllSchools).ToList();
+            }
+            <PermissionsTable Permissions="@canSeeallSchools" AllowEdit="true" ShowSchoolList="true" />
+
+
+            <br/><br/><br/><br/>
+            <h3>Can manage schools</h3>
+            @{
+                List<GroupPermission> canManageSchools = AllPermissions.Where(x => x.CanManageSchoolList).ToList();
+            }
+            <PermissionsTable Permissions="@canManageSchools" AllowEdit="true" ShowSchoolList="true" />
+
+
+            <br/><br/><br/><br/>
+            <h3>No admin permissions</h3>
+            @{
+                List<GroupPermission> noAdminPerms = new List<GroupPermission>();
+                foreach(GroupPermission perm in AllPermissions) 
+                {
+                    if (                        
+                        !perm.CanManageSubList &&
+                        !perm.CanManagePermissions &&
+                        !perm.CanSeeAllSchools &&
+                        !perm.CanManageSchoolList
+                    )
+                    {
+                        noAdminPerms.Add(perm);
+                    }
+                }
+
+            }
+            <PermissionsTable Permissions="@noAdminPerms" AllowEdit="true" ShowSchoolList="true" />
+
+        </div>
+        <br/><br/><br/><br/><br/>
+     </Authorized>
+     <NotAuthorized>
+         <p>Not Authorized</p>
+     </NotAuthorized>
+ </AuthorizeView>
+
+
+

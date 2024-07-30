@@ -77,10 +77,20 @@ IConfiguration Configuration = new ConfigurationBuilder()
                     .AddEnvironmentVariables()
                     .AddUserSecrets<Program>()
                     .Build();
+
+// Main DB connection
 builder.Services.AddSingleton<MongoDbConnection>(x => new MongoDbConnection(Configuration.GetConnectionString("Internal")));
 
+// Repositories (For services to consume)
+builder.Services.AddSingleton<IRepository<GroupPermission>, MongoRepository<GroupPermission>>();
 builder.Services.AddSingleton<IRepository<School>, MongoRepository<School>>();
+
+// Services (For pages to consume)
+builder.Services.AddSingleton<GroupPermissionService>();
 builder.Services.AddSingleton<SchoolService>();
+
+// Other services
+builder.Services.AddSingleton<PermissionsManager>();
 
 var app = builder.Build();
 

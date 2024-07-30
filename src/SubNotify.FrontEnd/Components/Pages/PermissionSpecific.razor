@@ -1,0 +1,241 @@
+@page "/Permission/{permissionid}"
+@using SubNotify.Core
+@using SubNotify.FrontEnd.Services
+@using SubNotify.FrontEnd.Components
+
+@code {
+
+    [Inject]
+    SchoolService? _schoolPermissionRepo { get; set; }
+
+    [Inject]
+    GroupPermissionService? _groupPermissionRepo { get; set; }
+
+    [Inject]
+    NavigationManager? NavigationManager { get; set; }
+    
+    [Inject]
+    PermissionsManager? PermissionsManager { get; set; }
+
+    [Parameter]
+    public string? permissionid { get; set; }
+
+    List<School> allSchools = new List<School>();
+
+    GroupPermission? perm = null;
+
+    Dictionary<Guid, School> schoolsByID = new Dictionary<Guid, School>();
+
+    protected override void OnInitialized()
+    {
+        if (permissionid != (new Guid()).ToString()) {
+            perm = _groupPermissionRepo?.Get(permissionid);
+        } else {
+            perm = new GroupPermission();
+        }
+
+        allSchools = _schoolPermissionRepo?.GetAll().OrderBy(x => x.Name).ToList() ?? new List<School>();
+
+        schoolsByID = allSchools.ToDictionary(x => x.Id);
+    }
+
+    protected void HandleInValidSubmit()
+    {
+        // Do nothing
+    }
+
+    protected void HandleValidSubmit()
+    {
+        if (perm != null)
+        {
+            // Sanitize
+
+            // Translate the school permission matrix to a list of GUIDs
+
+            // Save
+            _groupPermissionRepo?.InsertOrUpdate(perm);
+        }
+
+        // Refresh the cache of permissions in the permissions manager
+        PermissionsManager?.FlushPermissions();
+
+        // Navigate back
+        NavigationManager?.NavigateTo("/ManagePermissions");
+    }
+
+    protected void OnClick_Delete(GroupPermission perm)
+    {
+        // Save
+        _groupPermissionRepo?.Delete(perm);
+
+        // Refresh the cache of permissions in the permissions manager
+        PermissionsManager?.FlushPermissions();
+
+        // Navigate back
+        NavigationManager?.NavigateTo("/ManagePermissions");
+    }
+
+    protected void OnClick_Back()
+    {
+        // Navigate back
+        NavigationManager?.NavigateTo("/ManagePermissions");
+    }
+
+    private void AddSchool(Guid guid)
+    {
+
+        if (!perm.SchoolGUIDs.Contains(guid)) {
+            perm.SchoolGUIDs.Add(guid);
+        }
+    }
+
+    private void RemoveSchool(Guid guid) 
+    {
+        if (perm.SchoolGUIDs.Contains(guid)) {
+            perm.SchoolGUIDs.Remove(guid);
+        }
+    }
+}
+
+<AuthorizeView Context="user">
+    <Authorized>
+
+    <div class="page_container">
+        <h2>Edit permission</h2>
+        <br/><br/>
+
+    @if(perm != null) {
+        <EditForm FormName="PermissionEditForm" Model="@perm" OnValidSubmit="@HandleValidSubmit" OnInvalidSubmit="@HandleInValidSubmit">
+        <div class="form-group">
+            <div class="row">
+                <div class="col-sm-3"><b>ID (Read Only)</b></div>
+                <div class="col-sm-6">@((perm.Id.ToString() == (new Guid()).ToString()) ? "NEW" : @perm.Id.ToString())</div>
+            </div>
+            <br/>
+
+            <div class="row">
+                <div class="col-sm-3"><b>Name</b><div class="small">A meaningful name for this permission. For your informational purposes only, does not need to match anything. Special characters allowed.</div></div>
+                <div class="col-sm-6">
+                    <InputText @bind-Value="perm.Name" class="form-control" />
+                    <ValidationMessage For="@(() => perm.Name)" />
+                </div>
+            </div>
+            <br/>
+            <div class="row">
+                <div class="col-sm-3"><b>Description</b><div class="small">Only visible to users who can manage permissions. Special characters allowed.</div></div>
+                <div class="col-sm-6">
+                    <InputText @bind-Value="perm.Description" class="form-control" />
+                    <ValidationMessage For="@(() => perm.Description)" />
+                </div>
+            </div>
+            <br/>
+            <div class="row">
+                <div class="col-sm-3"><b>Group Claim</b><br/><div class="small">If this application is set up to use group names, then this needs to exactly match the group's name. If you change the group name in the external system, you need to change it here as well.</div><br/><div class="small">If this application is set up to use ObjectIDs, then this must exactly match an ObjectID from the external system (which is probably in the form of a GUID).</div></div>
+                <div class="col-sm-6">
+                    <InputText @bind-Value="perm.GroupClaim" class="form-control" />
+                    <ValidationMessage For="@(() => perm.GroupClaim)" />
+                    <div class="small">⚠️ If you change the group name in the external system, you must update this as well!</div>
+                </div>
+            </div>
+
+            <br/>
+            <div class="row">
+                <div class="col-sm-3"><b>Enable/Disable this permission</b></div>
+                <div class="col-sm-6">
+                    <InputCheckbox @bind-Value="perm.IsEnabled"/>
+                    <label class="form-check-label" style="font-weight: normal;">
+                        Group is enabled / visible
+                    </label>
+                    <ValidationMessage For="@(() => perm.IsEnabled)" />
+                </div>
+            </div>
+
+            <br/>
+
+            <div class="row">
+                <div class="col-sm-3"><b>Admin permissions</b></div>
+                <div class="col-sm-6">
+                    <InputCheckbox @bind-Value="perm.CanManageSubList"/>
+                    <label class="form-check-label" style="font-weight: normal;">
+                        Members can manage the available sub list.
+                    </label>
+                    <ValidationMessage For="@(() => perm.CanManageSubList)" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-3"></div>
+                <div class="col-sm-6">
+                    <InputCheckbox @bind-Value="perm.CanManagePermissions"/>
+                    <label class="form-check-label" style="font-weight: normal;">
+                        Members can manage permissions on this site.
+                    </label>
+                    <ValidationMessage For="@(() => perm.CanManagePermissions)" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-3"></div>
+                <div class="col-sm-6">
+                    <InputCheckbox @bind-Value="perm.CanManageSchoolList"/>
+                    <label class="form-check-label" style="font-weight: normal;">
+                        Members can manage the school list.
+                    </label>
+                    <ValidationMessage For="@(() => perm.CanManageSchoolList)" />
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-sm-3"></div>
+                <div class="col-sm-6">
+                    <InputCheckbox @bind-Value="perm.CanSeeAllSchools"/>
+                    <label class="form-check-label" style="font-weight: normal;">
+                        Members can see all schools (including disabled/hidden ones)
+                    </label>
+                    <ValidationMessage For="@(() => perm.CanSeeAllSchools)" />
+                </div>
+            </div>
+
+            <br/>
+            <div class="row">
+                <div class="col-sm-2"><b>School access</b><div class="small">Access to a school allows a user to view the available sub list (but not edit it), and allows access to submit upcoming sub notifications using this site for that school.</div><br/><div class="small">Groups can have multiple groups attached to them, but you probably want only one school per group.</div><br/><div class="small">Users can be in multiple external groups, which would grant them access to multiple permission records, and therefore multiple schools.</div></div>
+                <div class="col-sm-5">
+                    <b>Linked Schools</b>
+                    @foreach(Guid schoolid in perm.SchoolGUIDs)
+                    {
+                        <div><div style="display: inline;" class="small"><button type="button" class="btn btn-link" style="text-decoration: none;" @onclick="() => RemoveSchool(schoolid)">➖</button></div> @(schoolsByID[schoolid].Name)</div>
+                    }
+                </div>
+
+                <div class="col-sm-5">
+                    <b>Available Schools</b>
+                    @foreach(School school in allSchools.Where(x => !perm.SchoolGUIDs.Contains(x.Id)))
+                    {
+                        <div><div style="display: inline;" class="small"><button type="button" class="btn btn-link" style="text-decoration: none;" @onclick="() => AddSchool(school.Id)">➕</button></div>@school.Name</div>
+                    }
+                </div>
+            </div>
+            
+            <br/><br/>
+            <div class="form-group">
+                <div class="form-row row">
+                    <div class="col-sm-5">
+                        <button type="submit" class="btn btn-primary btn-block">Save</button>
+                    </div>
+                    <div class="col-sm-2">
+                        @if(perm.Id.ToString() != (new Guid()).ToString()) {
+                            <button type="button" class="btn btn-danger btn-block" @onclick="() => OnClick_Delete(perm)">Delete</button>
+                        }
+                    </div>
+                    <div class="col-sm-5" style="text-align: right;">
+                        <button type="button" class="btn btn-secondary btn-block" @onclick="OnClick_Back">Back</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        </EditForm>
+    } else {
+        <i>Object not found</i>
+    }
+        </div>
+    </Authorized>
+</AuthorizeView>

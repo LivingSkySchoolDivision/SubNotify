@@ -1,0 +1,41 @@
+@page "/PermissionsFullList"
+@using SubNotify.Core
+@using SubNotify.FrontEnd.Services
+@using System.Security.Claims
+
+
+@code {
+    [Inject]
+    GroupPermissionService? _repo { get; set; }
+
+    List<GroupPermission> AllPermissions = new List<GroupPermission>();
+
+    protected override void OnInitialized()
+    {
+        AllPermissions = _repo?.GetAll().ToList() ?? new List<GroupPermission>();        
+    }
+}
+
+<PageTitle>Permissions - Full List</PageTitle>
+
+<AuthorizeView>
+     <Authorized>
+        <div>
+            <h1>Permissions - Full List</h1>
+            <a href="/ManagePermissions">Back to permissions menu</a> | <a href="/Permission/@(new Guid())">Add New Permission</a>
+
+            <br/><br/>
+            <PermissionsTable Permissions="@AllPermissions" ShowSchoolList="true" AllowEdit="true" />
+
+            
+        </div>
+        <br/><br/><br/><br/><br/>
+     </Authorized>
+     <NotAuthorized>
+         <p>Not Authorized</p>
+     </NotAuthorized>
+ </AuthorizeView>
+
+
+
+ 

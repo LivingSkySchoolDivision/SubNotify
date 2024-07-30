@@ -3,54 +3,6 @@
 
 <PageTitle>Home</PageTitle>
 
-<style type="text/css">
-    .main_nav_button {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        width: 200px;
-        height: 200px;
-        border-radius: 15px;
-        margin: 10px;
-    }
-
-    .main_nav_button_icon {
-        width: 50%;
-        height: 300px;
-    }
-
-    .main_nav_button_icon img {
-        width: 100%;
-    }
-
-    .main_nav_button_text {
-        width: 100%;
-        height: 200px;
-        font-size: 12pt;
-        font-weight: bold;
-        text-align: center;
-        padding: 10px;
-    }
-
-    .main_nav_container {
-        display: flex;
-        flex-direction: row;
-        justify-content: center;
-        align-items: center;
-    }
-
-    .home_page_container {
-        max-width: 1000px;
-        margin-left: auto;
-        margin-right: auto;
-    }
-
-    a {
-        text-decoration: none;
-    }
-</style>
-
 <AuthorizeView>
      <Authorized>
         <br/><br/><br/>
@@ -60,42 +12,48 @@
             </div>
             <div class="main_nav_container">
 
-                <a href="/Notify">
+                <a class="menu_link" href="/Notify">
                     <div class="main_nav_button">
                         <div class="main_nav_button_icon"><img src="/img/substitute.svg"></div>
                         <div class="main_nav_button_text">Notify SIS of an upcoming substitute secretary</div>
                     </div>
                 </a>
 
-                <a href="/SubList">
+                <a class="menu_link" href="/SubList">
                     <div class="main_nav_button">
                         <div class="main_nav_button_icon"><img src="/img/list.svg"></div>
                         <div class="main_nav_button_text">View and request changes to the available sub list</div>
                     </div>
                 </a>
-<!---->
-                <a href="/ManagePermissions">
-                    <div class="main_nav_button">
-                        <div class="main_nav_button_icon"><img src="/img/security.svg"></div>
-                        <div class="main_nav_button_text">Manage permissions for this site</div>
-                    </div>
-                </a>
 
-                <a href="/ManageSchools">
+            </div>
+            <br/>
+            <div class="main_nav_container">
+
+                <a class="menu_link" href="/ManageSchools">
                     <div class="main_nav_button">
                         <div class="main_nav_button_icon"><img src="/img/school.svg"></div>
-                        <div class="main_nav_button_text">Manage schools for this site</div>
+                        <div class="main_nav_button_text">Manage school list</div>
                     </div>
                 </a>
 
-<!---->
+                <a class="menu_link" href="/ManageSubList">
+                    <div class="main_nav_button">
+                        <div class="main_nav_button_icon"><img src="/img/list-check.svg"></div>
+                        <div class="main_nav_button_text">Manage sub list</div>
+                    </div>
+                </a>
+
+                <a class="menu_link" href="/ManagePermissions">
+                    <div class="main_nav_button">
+                        <div class="main_nav_button_icon"><img src="/img/security.svg"></div>
+                        <div class="main_nav_button_text">Manage permissions</div>
+                    </div>
+                </a>
+
             </div>
 
-            <p>This menu needs to adapt to the user's permissions.<ul><li>Don't show "Manage permissions" unless the user has the right permissions</li><li>Don't show "Manage Schools" unless the user has the right permissions</li><li>Don't show "Notify" and "Request" if the user has no school associations</li></ul></p>
-
         </div>
-
-
 
      </Authorized>
      <NotAuthorized>

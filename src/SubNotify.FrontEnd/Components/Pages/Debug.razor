@@ -1,0 +1,72 @@
+@page "/debug"
+@using System.Security.Claims
+@using SubNotify.FrontEnd.Services
+@using SubNotify.FrontEnd.Components
+@using SubNotify.Core
+
+@code {
+    [Inject]
+    PermissionsManager? _permissionsManager { get; set; }
+    
+    [Inject]
+    SchoolService? _schoolRepo { get; set; }
+
+    [Inject ]
+    AuthenticationStateProvider? AuthenticationStateProvider { get; set;}
+    
+    List<GroupPermission> userPermissions = new List<GroupPermission>();
+    GroupPermission userCombinedPermission = new GroupPermission();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (AuthenticationStateProvider != null)
+        {
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            ClaimsPrincipal user = authState.User;
+            List<Claim> userClaims = user?.Claims.ToList() ?? new List<Claim>();
+            userPermissions = _permissionsManager.GetPermissionsForClaims(userClaims);
+            userCombinedPermission = _permissionsManager.GetCombinedPermissions(userClaims);
+        }
+    }
+
+    protected override void OnInitialized()
+    {        
+    }
+
+}
+
+<AuthorizeView>
+     <Authorized>
+
+        <h1>Debug page</h1>
+        <br/>
+        <h3>Detected permissions for @(context?.User?.Identity?.Name ?? "UNKNOWN USER")</h3>
+        <PermissionsTable Permissions="@userPermissions" ShowSchoolList="true" AllowEdit="false" />
+        
+        <br/><br/>
+        <h3>Combined permission</h3>
+        <PermissionsTable Permissions="@(new List<GroupPermission>() { userCombinedPermission })" ShowSchoolList="true" AllowEdit="false" />
+
+        <br/><br/>         
+        <h3>Claims for @(context?.User?.Identity?.Name ?? "UNKNOWN USER"):</h3>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Claim Label</th>
+                    <th>Claim Value</th>
+                    <th>Claim Issuer</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach(Claim claim in (context?.User?.Claims ?? new List<Claim>())) 
+                {
+                    <tr>
+                        <td>@(claim.Type)</td>
+                        <td>@(claim.Value.ToString())</td>
+                        <td>@(claim.Issuer)</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+     </Authorized>
+</AuthorizeView>

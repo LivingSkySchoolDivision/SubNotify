@@ -4,13 +4,18 @@ namespace SubNotify.Core;
 public class GroupPermission : IGUIDable
 {
     public Guid Id { get; set; }
-    public string GroupOID { get; set; } = string.Empty;
-    public string PermissionName { get; set; } = string.Empty;
-    public string GroupName { get; set; } = string.Empty;
-    public bool CanRequestSubs { get; set; }
-    public bool CanManageAvailableSubs { get; set; }
-    public bool CanManagePermissions { get; set; }
-    public bool CanSeeAllSchools { get; set; }
-    public List<Guid> SchoolGUIDs { get; set; } = new List<Guid>();
+    public string Name { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+    public string GroupClaim { get; set; } = string.Empty;
+    public bool IsEnabled { get; set; } = true;
     
+    // Administrative permissions
+    public bool CanManageSubList { get; set; } = false;
+    public bool CanManagePermissions { get; set; } = false;
+    public bool CanManageSchoolList { get; set; } = false;
+    public bool CanSeeAllSchools { get; set; } = false;
+
+    // School permissions
+    // Note: The permissions system should do a sanity check on the schools here, in case data is mangled or malicious
+    public List<Guid> SchoolGUIDs { get; set; } = new List<Guid>();
 }

@@ -1,0 +1,102 @@
+@using SubNotify.Core
+@using SubNotify.FrontEnd.Services
+@code {
+
+    [Inject]
+    SchoolService? _schoolRepo { get; set; }
+
+    [Parameter]
+    public List<GroupPermission> Permissions { get; set; } = new List<GroupPermission>();
+
+    [Parameter]
+    public bool AllowEdit { get; set; } = false;
+
+    [Parameter]
+    public bool ShowSchoolList { get; set; } = false;
+
+    Dictionary<Guid, School> schoolsByID = new Dictionary<Guid, School>();
+
+    protected override void OnInitialized()
+    {
+        schoolsByID = _schoolRepo?.GetAll().OrderBy(x => x.Name).ToDictionary(x => x.Id);
+    }
+
+    private string translateSchoolName(Guid guid)
+    {
+        if (schoolsByID.ContainsKey(guid))
+        {
+            return schoolsByID[guid].Name;
+        } else {
+            return guid.ToString();
+        }
+    }
+}
+
+<table class="table">
+<thead>
+    <tr>
+        <th>Name</th>
+        <th>Description</th>
+        <th>Is Enabled</th>
+        <th>External Group</th>
+        <th>Can manage sub list</th>
+        <th>Can manage permissions</th>
+        <th>Can manage schools</th>
+        <th>Can see all schools</th>
+        @if (@ShowSchoolList)
+        {
+            <th>Linked Schools</th>
+        }
+    </tr>
+</thead>
+
+@foreach(GroupPermission perm in Permissions.OrderBy(x => x.Name))
+{
+    string permissionDisplayName = perm.Name;
+    if (string.IsNullOrEmpty(permissionDisplayName))
+    {
+        permissionDisplayName = perm.Id.ToString();
+    }
+
+    if (!perm.IsEnabled)
+    {
+        permissionDisplayName += " (Disabled)";
+    }
+
+    <tr>
+        @if (AllowEdit)
+        {
+            <td style="padding: 5px;border-bottom: 1px solid #C0C0C0;"><a href="Permission/@(perm.Id)">@(permissionDisplayName)</a></td>
+        }
+        else
+        {
+            <td style="padding: 5px;border-bottom: 1px solid #C0C0C0;">@(permissionDisplayName)</td>
+        }
+        <td style="padding: 5px;border-bottom: 1px solid #C0C0C0;">@(perm.Description)</td>
+        <td style="padding: 5px;border-bottom: 1px solid #C0C0C0;">@(perm.IsEnabled ? "✅" : "⛔")</td>
+        <td style="padding: 5px;border-bottom: 1px solid #C0C0C0;">@(perm.GroupClaim)</td>
+        <td style="padding: 5px;border-bottom: 1px solid #C0C0C0;">@(perm.CanManageSubList ? "✅" : "⛔")</td>
+        <td style="padding: 5px;border-bottom: 1px solid #C0C0C0;">@(perm.CanManageSubList ? "✅" : "⛔")</td>
+        <td style="padding: 5px;border-bottom: 1px solid #C0C0C0;">@(perm.CanManagePermissions ? "✅" : "⛔")</td>
+        <td style="padding: 5px;border-bottom: 1px solid #C0C0C0;">@(perm.CanSeeAllSchools ? "✅" : "⛔")</td>
+        @if (@ShowSchoolList)
+        {
+            <td style="border-bottom: 1px solid #C0C0C0;">
+                <div class="small">
+                @foreach(Guid schoolid in perm.SchoolGUIDs)
+                {
+                    @(translateSchoolName(schoolid))
+                    <br/>
+                }
+                </div>
+            </td>
+        }
+    </tr>
+}
+</table>
+
+<div class="row">
+    <div class="col-sm-12" style="text-align: left;">
+        <i>Total: @(Permissions.Count)</i>
+    </div>
+</div>

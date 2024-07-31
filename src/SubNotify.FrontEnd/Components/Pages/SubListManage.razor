@@ -6,7 +6,12 @@
 @code {
     [Inject]
     PermissionsManager? _permissionsManager { get; set; }
+
+    [Inject]
+    SchoolService? _schoolRepo { get; set; }
     
+    [Inject]
+    AvailableSubService? _subRepo { get; set; }
 }
 <PageTitle>Sub List Manager</PageTitle>
 
@@ -16,9 +21,10 @@
         {
             <div class="page_container">
                 <h1>Manage -Sub list</h1>
-                <a href="/">Back to home</a>
+                <a href="/">Back to home</a> | <a href="/EditSub/@(new Guid())">Add New Available Sub</a>
                 <br/><br/>
                 
+                <AvailableSubTable List="@_subRepo.GetAll().ToList()" AllowEdit="true" ShowSchoolList="true"/>
             </div>
 
         } else {

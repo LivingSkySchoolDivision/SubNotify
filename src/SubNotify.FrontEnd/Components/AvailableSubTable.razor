@@ -1,0 +1,89 @@
+@using SubNotify.Core
+@using SubNotify.FrontEnd.Services
+@code {
+
+    [Inject]
+    SchoolService? _schoolRepo { get; set; }
+
+    [Parameter]
+    public List<AvailableSub> List { get; set; } = new List<AvailableSub>();
+
+    [Parameter]
+    public bool AllowEdit { get; set; } = false;
+
+    [Parameter]
+    public bool ShowSchoolList { get; set; } = false;
+
+    Dictionary<Guid, School> schoolsByID = new Dictionary<Guid, School>();
+
+    protected override void OnInitialized()
+    {
+        schoolsByID = _schoolRepo?.GetAll().OrderBy(x => x.Name).ToDictionary(x => x.Id);
+    }
+
+    private string translateSchoolName(Guid guid)
+    {
+        if (schoolsByID.ContainsKey(guid))
+        {
+            return schoolsByID[guid].Name;
+        } else {
+            return guid.ToString();
+        }
+    }
+}
+
+<table class="table">
+<thead>
+    <tr>
+        <th>Display Name</th>
+        <th>Email</th>
+        <th>Description</th> 
+        <th>IsEnabled</th>       
+        @if (@ShowSchoolList)
+        {
+            <th>Linked Schools</th>
+        }
+    </tr>
+</thead>
+
+@foreach(AvailableSub sub in List.OrderBy(x => x.Surname).ThenBy(x => x.GivenName))
+{    
+    string displayName = sub.Surname + ", " + sub.GivenName;    
+    if ((displayName.StartsWith(',')) || (displayName.EndsWith(", ")))
+    {
+        displayName = sub.Id.ToString();
+    }
+
+    <tr>
+        @if (AllowEdit)
+        {
+            <td style="padding: 5px;border-bottom: 1px solid #C0C0C0;"><a href="EditSub/@(sub.Id)">@(displayName)</a></td>
+        }
+        else
+        {
+            <td style="padding: 5px;border-bottom: 1px solid #C0C0C0;">@(displayName)</td>
+        }
+        <td style="padding: 5px;border-bottom: 1px solid #C0C0C0;">@(sub.Email)</td>
+        <td style="padding: 5px;border-bottom: 1px solid #C0C0C0;">@(sub.Description)</td>
+        <td style="padding: 5px;border-bottom: 1px solid #C0C0C0;">@(sub.IsEnabled ? "✅" : "⛔")</td>
+        @if (@ShowSchoolList)
+        {
+            <td style="border-bottom: 1px solid #C0C0C0;">
+                <div class="small">
+                @foreach(Guid schoolid in sub.SchoolGUIDs)
+                {
+                    @(translateSchoolName(schoolid))
+                    <br/>
+                }
+                </div>
+            </td>
+        }
+    </tr>
+}
+</table>
+
+<div class="row">
+    <div class="col-sm-12" style="text-align: left;">
+        <i>Total: @(List.Count)</i>
+    </div>
+</div>

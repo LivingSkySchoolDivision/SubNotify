@@ -84,9 +84,11 @@ builder.Services.AddSingleton<MongoDbConnection>(x => new MongoDbConnection(Conf
 // Repositories (For services to consume)
 builder.Services.AddSingleton<IRepository<GroupPermission>, MongoRepository<GroupPermission>>();
 builder.Services.AddSingleton<IRepository<School>, MongoRepository<School>>();
+builder.Services.AddSingleton<IRepository<AvailableSub>, MongoRepository<AvailableSub>>();
 
 // Services (For pages to consume)
 builder.Services.AddSingleton<GroupPermissionService>();
+builder.Services.AddSingleton<AvailableSubService>();
 builder.Services.AddSingleton<SchoolService>();
 
 // Other services

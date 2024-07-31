@@ -1,0 +1,208 @@
+@page "/EditSub/{subid}"
+@using SubNotify.Core
+@using SubNotify.FrontEnd.Services
+@using SubNotify.FrontEnd.Components
+
+@code {
+    [Inject]
+    PermissionsManager? _permissionsManager { get; set; }
+
+    [Inject]
+    NavigationManager? NavigationManager { get; set; }
+    [Inject]
+    SchoolService? _schoolRepo { get; set; }
+
+    [Inject]
+    AvailableSubService? _subRepo { get; set; }
+        
+
+    [Parameter]
+    public string? subid { get; set; }
+    
+    AvailableSub? sub = null;
+    List<School> allSchools = new List<School>();
+    Dictionary<Guid, School> schoolsByID = new Dictionary<Guid, School>();
+   
+
+    protected override void OnInitialized()
+    {
+        if (subid != (new Guid()).ToString()) {
+            sub = _subRepo?.Get(subid);
+        } else {
+            sub = new AvailableSub();
+        }
+
+        allSchools = _schoolRepo?.GetAll().OrderBy(x => x.Name).ToList() ?? new List<School>();
+
+        schoolsByID = allSchools.ToDictionary(x => x.Id);
+    }
+
+    protected void HandleInValidSubmit()
+    {
+        // Do nothing
+    }
+
+    protected void HandleValidSubmit()
+    {
+        if (sub != null)
+        {
+            _subRepo?.InsertOrUpdate(sub);
+        }
+
+        // Navigate back
+        NavigationManager?.NavigateTo("/ManageSubList");
+    }
+
+    protected void OnClick_Delete(AvailableSub sub)
+    {
+        // Save
+        _subRepo?.Delete(sub);
+
+        // Navigate back
+        NavigationManager?.NavigateTo("/ManageSubList");
+    }
+
+    protected void OnClick_Back()
+    {
+        // Navigate back
+        NavigationManager?.NavigateTo("/ManageSubList");
+    }
+
+    private void AddSchool(Guid guid)
+    {
+
+        if (!sub.SchoolGUIDs.Contains(guid)) 
+        {
+            sub.SchoolGUIDs.Add(guid);
+        }
+    }
+
+    private void RemoveSchool(Guid guid) 
+    {
+        if (sub.SchoolGUIDs.Contains(guid)) 
+        {
+            sub.SchoolGUIDs.Remove(guid);
+        }
+    }
+}
+
+
+<AuthorizeView Context="usercontext">
+    <Authorized>
+        @if (_permissionsManager?.CanManageSubList(usercontext?.User) ?? false)
+        {
+            <div class="page_container">
+                <h2>Edit Available Sub</h2>
+                <br/><br/>
+
+                @if(sub != null) {
+                    <EditForm FormName="PermissionEditForm" Model="@sub" OnValidSubmit="@HandleValidSubmit" OnInvalidSubmit="@HandleInValidSubmit">
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-sm-3"><b>ID (Read Only)</b></div>
+                            <div class="col-sm-6">@((sub.Id.ToString() == (new Guid()).ToString()) ? "NEW" : @sub.Id.ToString())</div>
+                        </div>
+                        <br/>
+                        
+                        <div class="row">
+                            <div class="col-sm-3"><b>Given Name</b></div>
+                            <div class="col-sm-6">
+                                <InputText @bind-Value="sub.GivenName" class="form-control" />
+                                <ValidationMessage For="@(() => sub.GivenName)" />
+                            </div>
+                        </div>
+
+                        <br/>
+                        <div class="row">
+                            <div class="col-sm-3"><b>Surname</b></div>
+                            <div class="col-sm-6">
+                                <InputText @bind-Value="sub.Surname" class="form-control" />
+                                <ValidationMessage For="@(() => sub.Surname)" />
+                            </div>
+                        </div>
+                        <br/>
+
+                        <br/>
+                        <div class="row">
+                            <div class="col-sm-3"><b>Email / UPN</b><div class="small">For informational purposes only, does not impact logins to this system.</div></div>
+                            <div class="col-sm-6">
+                                <InputText @bind-Value="sub.Email" class="form-control" />
+                                <ValidationMessage For="@(() => sub.Email)" />
+                            </div>
+                        </div>
+                        <br/>
+
+                        <br/>
+                        <div class="row">
+                            <div class="col-sm-3"><b>Description</b><div class="small">Only visible to users who can manage the sub list.</div></div>
+                            <div class="col-sm-6">
+                                <InputTextArea @bind-Value="sub.Description" class="form-control" />
+                                <ValidationMessage For="@(() => sub.Description)" />
+                            </div>
+                        </div>
+                        <br/>
+
+                        <br/>
+                        <div class="row">
+                            <div class="col-sm-3"><b>Enable/Disable</b><div class="small">Disabled subs are hidden from end-user lists.</div></div>
+                            <div class="col-sm-6">
+                                <InputCheckbox @bind-Value="sub.IsEnabled"/>
+                                <label class="form-check-label" style="font-weight: normal;">
+                                    Sub is enabled / visible
+                                </label>
+                                <ValidationMessage For="@(() => sub.IsEnabled)" />
+                            </div>
+                        </div>
+
+                        <br/>
+                        <div class="row">
+                            <div class="col-sm-2"><b>School links</b><div class="small">Access to a school allows a user to view the available sub list (but not edit it), and allows access to submit upcoming sub notifications using this site for that school.</div><br/><div class="small">Groups can have multiple groups attached to them, but you probably want only one school per group.</div><br/><div class="small">Users can be in multiple external groups, which would grant them access to multiple permission records, and therefore multiple schools.</div></div>
+                            <div class="col-sm-5">
+                                <b>Linked Schools</b>
+                                @foreach(Guid schoolid in sub.SchoolGUIDs)
+                                {
+                                    <div><div style="display: inline;" class="small"><button type="button" class="btn btn-link" style="text-decoration: none;" @onclick="() => RemoveSchool(schoolid)">➖</button></div> @(schoolsByID[schoolid].Name)</div>
+                                }
+                            </div>
+
+                            <div class="col-sm-5">
+                                <b>Available Schools</b>
+                                @foreach(School school in allSchools.Where(x => !sub.SchoolGUIDs.Contains(x.Id)))
+                                {
+                                    <div><div style="display: inline;" class="small"><button type="button" class="btn btn-link" style="text-decoration: none;" @onclick="() => AddSchool(school.Id)">➕</button></div>@school.Name</div>
+                                }
+                            </div>
+                        </div>
+                        
+                        <br/><br/>
+                        <div class="form-group">
+                            <div class="form-row row">
+                                <div class="col-sm-5">
+                                    <button type="submit" class="btn btn-primary btn-block">Save</button>
+                                </div>
+                                <div class="col-sm-2">
+                                    @if(sub.Id.ToString() != (new Guid()).ToString()) {
+                                        <button type="button" class="btn btn-danger btn-block" @onclick="() => OnClick_Delete(sub)">Delete</button>
+                                    }
+                                </div>
+                                <div class="col-sm-5" style="text-align: right;">
+                                    <button type="button" class="btn btn-secondary btn-block" @onclick="OnClick_Back">Back</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    </EditForm>
+                } else {
+                    <i>Object not found</i>
+                }
+
+            
+            </div>
+        } else {
+            <br/><br/>
+            <div style="text-align: center;"><b>😥 Sorry, you don't have access to this page ⛔</b></div>
+        }
+        <br/><br/><br/><br/><br/>
+    </Authorized>
+</AuthorizeView>

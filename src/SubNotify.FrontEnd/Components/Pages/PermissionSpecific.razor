@@ -7,9 +7,8 @@
     [Inject]
     PermissionsManager? _permissionsManager { get; set; }
     
-
     [Inject]
-    SchoolService? _schoolPermissionRepo { get; set; }
+    SchoolService? _schoolRepo { get; set; }
 
     [Inject]
     GroupPermissionService? _groupPermissionRepo { get; set; }
@@ -37,7 +36,7 @@
             perm = new GroupPermission();
         }
 
-        allSchools = _schoolPermissionRepo?.GetAll().OrderBy(x => x.Name).ToList() ?? new List<School>();
+        allSchools = _schoolRepo?.GetAll().OrderBy(x => x.Name).ToList() ?? new List<School>();
 
         schoolsByID = allSchools.ToDictionary(x => x.Id);
     }
@@ -51,11 +50,6 @@
     {
         if (perm != null)
         {
-            // Sanitize
-
-            // Translate the school permission matrix to a list of GUIDs
-
-            // Save
             _groupPermissionRepo?.InsertOrUpdate(perm);
         }
 

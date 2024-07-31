@@ -1,51 +1,66 @@
 @page "/ManagePermissions"
 @using System.Security.Claims
+@using SubNotify.FrontEnd.Services
+
+@code {
+
+    [Inject]
+    PermissionsManager? _permissionsManager { get; set; }
+    
+
+}
 
 <PageTitle>Permissions</PageTitle>
 
 <AuthorizeView>
      <Authorized>
-        <br/><br/><br/>
-        <div class="home_page_container">
-            <div style="text-align: center;">
-                <h1 style="font-weight: bold; border-bottom: 1px solid #C0C0C0;">Permissions</h1>
+
+        @if (_permissionsManager?.CanManagePermissions(context?.User) ?? false)
+        {
+            <br/><br/><br/>
+            <div class="home_page_container">
+                <div style="text-align: center;">
+                    <h1 style="font-weight: bold; border-bottom: 1px solid #C0C0C0;">Permissions</h1>
+                </div>
+
+                <div style="text-align: center;">
+                    <i>All sections below display and access the same app permissions, but they display them differently.</i>
+                </div>
+
+                <div class="main_nav_container">
+
+                    <a class="menu_link" href="/PermissionsFullList">
+                        <div class="main_nav_button">
+                            <div class="main_nav_button_icon"><img src="/img/security.svg"></div>
+                            <div class="main_nav_button_text">All permissions</div>                        
+                        </div>
+                    </a>
+
+                    <a class="menu_link" href="/PermissionsBySchool">
+                        <div class="main_nav_button">
+                            <div class="main_nav_button_icon"><img src="/img/security.svg"></div>
+                            <div class="main_nav_button_text">Permissions by School</div>
+                        </div>
+                    </a>
+
+                    <a class="menu_link" href="/PermissionsByPermission">
+                        <div class="main_nav_button">
+                            <div class="main_nav_button_icon"><img src="/img/security.svg"></div>
+                            <div class="main_nav_button_text">Administrative permissions</div>
+                        </div>
+                    </a>
+                </div>
+
+                <div style="text-align: center;">
+                    <a href="/">Back to home</a> 
+                </div>
             </div>
 
-            <div style="text-align: center;">
-                <i>All sections below display and access the same app permissions, but they display them differently.</i>
-            </div>
-
-            <div class="main_nav_container">
-
-                <a class="menu_link" href="/PermissionsFullList">
-                    <div class="main_nav_button">
-                        <div class="main_nav_button_icon"><img src="/img/security.svg"></div>
-                        <div class="main_nav_button_text">All permissions</div>                        
-                    </div>
-                </a>
-
-                <a class="menu_link" href="/PermissionsBySchool">
-                    <div class="main_nav_button">
-                        <div class="main_nav_button_icon"><img src="/img/security.svg"></div>
-                        <div class="main_nav_button_text">Permissions by School</div>
-                    </div>
-                </a>
-
-                <a class="menu_link" href="/PermissionsByPermission">
-                    <div class="main_nav_button">
-                        <div class="main_nav_button_icon"><img src="/img/security.svg"></div>
-                        <div class="main_nav_button_text">Administrative permissions</div>
-                    </div>
-                </a>
-            </div>
-
-            <div style="text-align: center;">
-                <a href="/">Back to home</a> 
-            </div>
-
-
-        </div>
-
+        } else {
+            <br/><br/>
+            <div style="text-align: center;"><b>😥 Sorry, you don't have access to this page ⛔</b></div>
+        }
+        <br/><br/><br/><br/><br/>
      </Authorized>
      <NotAuthorized>
          <p>Not Authorized</p>

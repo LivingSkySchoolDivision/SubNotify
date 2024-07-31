@@ -1,5 +1,12 @@
 ﻿@page "/"
 @using System.Security.Claims
+@using SubNotify.FrontEnd.Services
+
+@code {
+
+    [Inject]
+    PermissionsManager? _permissionsManager { get; set; }
+}
 
 <PageTitle>Home</PageTitle>
 
@@ -29,27 +36,35 @@
             </div>
             <br/>
             <div class="main_nav_container">
-
+            @if (_permissionsManager?.CanManageSchoolList(context?.User) ?? false)
+            {
                 <a class="menu_link" href="/ManageSchools">
                     <div class="main_nav_button">
                         <div class="main_nav_button_icon"><img src="/img/school.svg"></div>
                         <div class="main_nav_button_text">Manage school list</div>
                     </div>
                 </a>
+            }
 
+            @if (_permissionsManager?.CanManageSubList(context?.User) ?? false)
+            {
                 <a class="menu_link" href="/ManageSubList">
                     <div class="main_nav_button">
                         <div class="main_nav_button_icon"><img src="/img/list-check.svg"></div>
                         <div class="main_nav_button_text">Manage sub list</div>
                     </div>
                 </a>
-
+            }   
+            
+            @if (_permissionsManager?.CanManagePermissions(context?.User) ?? false)
+            {
                 <a class="menu_link" href="/ManagePermissions">
                     <div class="main_nav_button">
                         <div class="main_nav_button_icon"><img src="/img/security.svg"></div>
                         <div class="main_nav_button_text">Manage permissions</div>
                     </div>
                 </a>
+            }
 
             </div>
 

@@ -4,6 +4,9 @@
 @using SubNotify.FrontEnd.Components
 
 @code {
+    [Inject]
+    PermissionsManager? _permissionsManager { get; set; }
+    
 
     [Inject]
     SchoolService? _schoolPermissionRepo { get; set; }
@@ -97,8 +100,10 @@
     }
 }
 
-<AuthorizeView Context="user">
+<AuthorizeView Context="usercontext">
     <Authorized>
+        @if (_permissionsManager?.CanManagePermissions(usercontext?.User) ?? false)
+        {
 
     <div class="page_container">
         <h2>Edit permission</h2>
@@ -237,5 +242,10 @@
         <i>Object not found</i>
     }
         </div>
+        } else {
+            <br/><br/>
+            <div style="text-align: center;"><b>😥 Sorry, you don't have access to this page ⛔</b></div>
+        }
+        <br/><br/><br/><br/><br/>
     </Authorized>
 </AuthorizeView>

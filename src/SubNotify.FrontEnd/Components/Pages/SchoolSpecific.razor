@@ -3,7 +3,9 @@
 @using SubNotify.FrontEnd.Services
 
 @code {
-    
+    [Inject]
+    PermissionsManager? _permissionsManager { get; set; }
+        
     [Inject]
     SchoolService? _repo { get; set; }
     
@@ -59,8 +61,11 @@
 
 }
 
-<AuthorizeView Context="user">
+<AuthorizeView Context="usercontext">
     <Authorized>
+
+        @if (_permissionsManager?.CanManageSchoolList(usercontext?.User) ?? false)
+        {
       
     <div class="page_container">
 
@@ -111,5 +116,9 @@
         <i>Object not found</i>
     }
 </div>
+        } else {
+            <br/><br/>
+            <div style="text-align: center;"><b>😥 Sorry, you don't have access to this page ⛔</b></div>
+        }
     </Authorized>
 </AuthorizeView>

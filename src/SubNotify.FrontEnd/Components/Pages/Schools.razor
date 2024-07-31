@@ -4,6 +4,9 @@
 
 @code {
     [Inject]
+    PermissionsManager? _permissionsManager { get; set; }
+    
+    [Inject]
     SchoolService? _repo { get; set; }
 
     List<School> AllSchools = new List<School>();
@@ -14,38 +17,44 @@
     }
 }
 
-<AuthorizeView Context="user">
-    <Authorized>      
-        <div class="page_container">
-            <h1>Schools</h1>
-            <a href="/">Back to home</a>
+<AuthorizeView Context="usercontext">
+    <Authorized> 
+        @if (_permissionsManager?.CanManageSchoolList(usercontext?.User) ?? false)
+        {     
+            <div class="page_container">
+                <h1>Schools</h1>
+                <a href="/">Back to home</a>
 
-            <br/><br/>
-            <table class="table">
-                <thead>
+                <br/><br/>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th width="40%">Name</th>
+                            <th width="10%">Is Enabled</th>
+                        </tr>
+                    </thead>
+
+                @foreach(School school in AllSchools.OrderBy(x => x.Name)) 
+                {
                     <tr>
-                        <th width="40%">Name</th>
-                        <th width="10%">Is Enabled</th>
+                        <td style="padding: 5px;"><a href="EditSchool/@(school.Id)">@(school.Name)</a></td>
+                        <td style="padding: 5px;">@(school.IsEnabled ? "Yes" : "NO (HIDDEN)")</td>                    
                     </tr>
-                </thead>
+                }
 
-            @foreach(School school in AllSchools.OrderBy(x => x.Name)) 
-            {
-                <tr>
-                    <td style="padding: 5px;"><a href="EditSchool/@(school.Id)">@(school.Name)</a></td>
-                    <td style="padding: 5px;">@(school.IsEnabled ? "Yes" : "NO (HIDDEN)")</td>                    
-                </tr>
-            }
-
-            </table>
-            <div class="row">
-                <div class="col-sm-12" style="text-align: left;">                    
-                    <i>Total: @(AllSchools.Count)</i>
-                    <br/>
-                    <a href="/EditSchool/@(new Guid())">Add New School</a>
+                </table>
+                <div class="row">
+                    <div class="col-sm-12" style="text-align: left;">                    
+                        <i>Total: @(AllSchools.Count)</i>
+                        <br/>
+                        <a href="/EditSchool/@(new Guid())">Add New School</a>
+                    </div>
                 </div>
             </div>
-        </div>
+        } else {
+            <br/><br/>
+            <div style="text-align: center;"><b>😥 Sorry, you don't have access to this page ⛔</b></div>
+        }
         <br/><br/><br/><br/><br/>
     </Authorized>
 </AuthorizeView>

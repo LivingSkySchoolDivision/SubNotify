@@ -6,6 +6,9 @@
 
 @code {
     [Inject]
+    PermissionsManager? _permissionsManager { get; set; }
+    
+    [Inject]
     GroupPermissionService? _repo { get; set; }
 
     List<GroupPermission> AllPermissions = new List<GroupPermission>();
@@ -20,15 +23,20 @@
 
 <AuthorizeView>
      <Authorized>
-        <div>
-            <h1>Permissions - Full List</h1>
-            <a href="/ManagePermissions">Back to permissions menu</a> | <a href="/Permission/@(new Guid())">Add New Permission</a>
 
+        @if (_permissionsManager?.CanManagePermissions(context?.User) ?? false)
+        {
+            <div>
+                <h1>Permissions - Full List</h1>
+                <a href="/ManagePermissions">Back to permissions menu</a> | <a href="/Permission/@(new Guid())">Add New Permission</a>
+
+                <br/><br/>
+                <PermissionsTable Permissions="@AllPermissions" ShowSchoolList="true" AllowEdit="true" />
+            </div>
+        } else {
             <br/><br/>
-            <PermissionsTable Permissions="@AllPermissions" ShowSchoolList="true" AllowEdit="true" />
-
-            
-        </div>
+            <div style="text-align: center;"><b>😥 Sorry, you don't have access to this page ⛔</b></div>
+        }
         <br/><br/><br/><br/><br/>
      </Authorized>
      <NotAuthorized>

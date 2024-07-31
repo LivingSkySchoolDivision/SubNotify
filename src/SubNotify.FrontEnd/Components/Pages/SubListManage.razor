@@ -1,7 +1,33 @@
 @page "/ManageSubList"
+@using SubNotify.Core
+@using SubNotify.FrontEnd.Services
+@using System.Security.Claims
 
-<div class="page_container">
-    <h1>Manage -Sub list</h1>
-    <a href="/">Back to home</a>
-    <br/><br/>
-</div>
+@code {
+    [Inject]
+    PermissionsManager? _permissionsManager { get; set; }
+    
+}
+<PageTitle>Sub List Manager</PageTitle>
+
+<AuthorizeView>
+     <Authorized>
+        @if (_permissionsManager?.CanManagePermissions(context?.User) ?? false)
+        {
+            <div class="page_container">
+                <h1>Manage -Sub list</h1>
+                <a href="/">Back to home</a>
+                <br/><br/>
+                
+            </div>
+
+        } else {
+            <br/><br/>
+            <div style="text-align: center;"><b>😥 Sorry, you don't have access to this page ⛔</b></div>
+        }
+        <br/><br/><br/><br/><br/>
+     </Authorized>
+     <NotAuthorized>
+         <p>Not Authorized</p>
+     </NotAuthorized>
+ </AuthorizeView>

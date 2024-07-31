@@ -7,6 +7,9 @@
 
 @code {
     [Inject]
+    PermissionsManager? _permissionsManager { get; set; }
+    
+    [Inject]
     GroupPermissionService? _repo { get; set; }
 
     [Inject]
@@ -26,30 +29,37 @@
 
 <AuthorizeView>
      <Authorized>
-        <div>
-            <h1>Permissions - By School</h1>
-            <a href="/ManagePermissions">Back to permissions menu</a> | <a href="/Permission/@(new Guid())">Add New Permission</a>
+        @if (_permissionsManager?.CanManagePermissions(context?.User) ?? false)
+        {
+            <div>
+                <h1>Permissions - By School</h1>
+                <a href="/ManagePermissions">Back to permissions menu</a> | <a href="/Permission/@(new Guid())">Add New Permission</a>
 
-            @foreach(School school in AllSchools)
-            {
-                List<GroupPermission> schoolPerms = AllPermissions.Where(x => (x.SchoolGUIDs.Contains(school.Id)) || (x.CanSeeAllSchools)).ToList();
+                @foreach(School school in AllSchools)
+                {
+                    List<GroupPermission> schoolPerms = AllPermissions.Where(x => (x.SchoolGUIDs.Contains(school.Id)) || (x.CanSeeAllSchools)).ToList();
+
+                    <br/><br/>
+                    <br/><br/>
+                    <h3>@school.Name</h3>
+                    <PermissionsTable Permissions="@schoolPerms" AllowEdit="true" />
+                }
 
                 <br/><br/>
                 <br/><br/>
-                <h3>@school.Name</h3>
-                <PermissionsTable Permissions="@schoolPerms" AllowEdit="true" />
-            }
+                <h2>No valid school associations</h2>
+                @{
+                    List<GroupPermission> orphanedPerms = new List<GroupPermission>();
+                }
+                <PermissionsTable Permissions="@orphanedPerms" AllowEdit="true" />
 
+
+            </div>
+        
+        } else {
             <br/><br/>
-            <br/><br/>
-            <h2>No valid school associations</h2>
-            @{
-                List<GroupPermission> orphanedPerms = new List<GroupPermission>();
-            }
-            <PermissionsTable Permissions="@orphanedPerms" AllowEdit="true" />
-
-
-        </div>
+            <div style="text-align: center;"><b>😥 Sorry, you don't have access to this page ⛔</b></div>
+        }
         <br/><br/><br/><br/><br/>
      </Authorized>
      <NotAuthorized>

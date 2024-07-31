@@ -16,6 +16,7 @@
     
     List<GroupPermission> userPermissions = new List<GroupPermission>();
     GroupPermission userCombinedPermission = new GroupPermission();
+    List<School> userAllowedSchools = new List<School>();
 
     protected override async Task OnInitializedAsync()
     {
@@ -23,9 +24,9 @@
         {
             var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
             ClaimsPrincipal user = authState.User;
-            List<Claim> userClaims = user?.Claims.ToList() ?? new List<Claim>();
-            userPermissions = _permissionsManager.GetPermissionsForClaims(userClaims);
-            userCombinedPermission = _permissionsManager.GetCombinedPermissions(userClaims);
+            userPermissions = _permissionsManager.GetGranularPermissionsFor(user);
+            userCombinedPermission = _permissionsManager.GetCombinedPermissions(user);
+            userAllowedSchools = _permissionsManager.GetSchoolsForUser(user);
         }
     }
 
@@ -46,6 +47,20 @@
         <br/><br/>
         <h3>Combined permission</h3>
         <PermissionsTable Permissions="@(new List<GroupPermission>() { userCombinedPermission })" ShowSchoolList="true" AllowEdit="false" />
+
+        <br/><br/>
+        <h3>Allowed Schools</h3>
+        <ul>
+            @if(userAllowedSchools.Count > 0)
+            {
+                @foreach(School school in userAllowedSchools)
+                {
+                    <li>@school.Name (@school.Id)</li>
+                }
+            } else {
+                <li><i>None.</i></li>
+            }
+        </ul>
 
         <br/><br/>         
         <h3>Claims for @(context?.User?.Identity?.Name ?? "UNKNOWN USER"):</h3>

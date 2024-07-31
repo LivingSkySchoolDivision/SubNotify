@@ -51,5 +51,10 @@ namespace SubNotify.FrontEnd.Services
                 return _repository.GetById(id);
             }
         }
+
+        public List<AvailableSub> GetEnabledForSchoolGUID(Guid schoolGuid)
+        {
+            return this.GetEnabled().Where(x => x.IsEnabled).Where(x => x.SchoolGUIDs.Contains(schoolGuid)).ToList();
+        }
     }
 }

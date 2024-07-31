@@ -86,7 +86,6 @@
     }
 }
 
-
 <AuthorizeView Context="usercontext">
     <Authorized>
         @if (_permissionsManager?.CanManageSubList(usercontext?.User) ?? false)

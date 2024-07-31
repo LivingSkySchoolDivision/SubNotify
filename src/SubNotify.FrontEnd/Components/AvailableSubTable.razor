@@ -47,21 +47,15 @@
 </thead>
 
 @foreach(AvailableSub sub in List.OrderBy(x => x.Surname).ThenBy(x => x.GivenName))
-{    
-    string displayName = sub.Surname + ", " + sub.GivenName;    
-    if ((displayName.StartsWith(',')) || (displayName.EndsWith(", ")))
-    {
-        displayName = sub.Id.ToString();
-    }
-
+{   
     <tr>
         @if (AllowEdit)
         {
-            <td style="padding: 5px;border-bottom: 1px solid #C0C0C0;"><a href="EditSub/@(sub.Id)">@(displayName)</a></td>
+            <td style="padding: 5px;border-bottom: 1px solid #C0C0C0;"><a href="EditSub/@(sub.Id)">@(sub.DisplayName)</a></td>
         }
         else
         {
-            <td style="padding: 5px;border-bottom: 1px solid #C0C0C0;">@(displayName)</td>
+            <td style="padding: 5px;border-bottom: 1px solid #C0C0C0;">@(sub.DisplayName)</td>
         }
         <td style="padding: 5px;border-bottom: 1px solid #C0C0C0;">@(sub.Email)</td>
         <td style="padding: 5px;border-bottom: 1px solid #C0C0C0;">@(sub.Description)</td>

@@ -1,37 +1,90 @@
 @page "/SubList"
 @using SubNotify.FrontEnd.Services
 @using System.Security.Claims
+@using SubNotify.Core
 
 @code {
     [Inject]
     PermissionsManager? _permissionsManager { get; set; }
+
+    [Inject]
+    SchoolService? _schoolService { get; set; }
+
+    [Inject]
+    AvailableSubService? _subRepo { get; set; }
+
+    [Inject ]
+    AuthenticationStateProvider? AuthenticationStateProvider { get; set;}
+    
+
+
+    Dictionary<Guid, School> schoolsByID = new Dictionary<Guid, School>();
+
+    GroupPermission userPermissions = new GroupPermission();
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        List<School> allSchools = _schoolService?.GetAll().OrderBy(x => x.Name).ToList() ?? new List<School>();
+        schoolsByID = allSchools.ToDictionary(x => x.Id);
+
+        if (AuthenticationStateProvider != null)
+        {
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            ClaimsPrincipal user = authState.User;
+            userPermissions = _permissionsManager.GetCombinedPermissions(user);
+        }            
+    }
 }
 <AuthorizeView>
      <Authorized>
         <div class="page_container">
-        <h1>Sub list</h1>
-        <a href="/">Back to home</a>
-        <br/><br/>
+            <h1>Sub list</h1>
+            <a href="/">Back to home</a>
+            <br/><br/><br/>
 
-        <h2>School that this user has access to</h2>
-        <ul>
-            <li>Person</li>
-            <li>Person</li>
-        </ul>
-        <h2>School B</h2>
-        <ul>
-            <li>Person</li>
-            <li>Person</li>
-            <li>Person</li>
-        </ul>
+            <h2>How to make changes to this list</h2>
+            <p>
+                We require <b>at least 2 (two) full business days notice</b> for any modifications to this list. Failure to provide the required notice for an unlisted substitute will prevent them from being able to access SIS systems, including MSS, Edsby, and school email accounts. It is not possible to expedite this process - <b>ensure that this list is up to date before you need to use it</b>.
+            </p>
+            <p>
+                To request a change to the available sub list, or to request changes to the schools that you have acces to on this site, please create a Help Desk ticket by visiting <a href="https://helpdesk.lskysd.ca">https://helpdesk.lskysd.ca</a>, by emailing <a href="mailto:help.desk.sis@lskysd.ca">help.desk.sis@lskysd.ca</a>, or by calling <b>(306) 937-7962</b> and selecting <b>1 (one)</b> to reach the Student Information Systems team.
+            </p>
 
-        <h1>How to make changes to this list</h1>
-        This could be a special form that asks for the specific information that we need, and then creates a Jira ticket. But that locks this software in to Jira, so it's not great.
-        This could also be an informational page that directs users to create a help desk ticket.
+            <br/><br/><br/>
 
+            <h2>Sub list</h2>
+            <p>Below is the list of available substitute secretaries for the schools that you have access to.</p>
+            
+            @foreach(Guid schoolGuid in userPermissions.SchoolGUIDs)
+            {
+                @if (schoolsByID.ContainsKey(schoolGuid)) {
+                    School thisSchool = schoolsByID[schoolGuid];
 
-        <h1>Add someone to the sub list</h1>
-        <h1>Remove someone to the sub list</h1>
+                    <h5>@(thisSchool.Name)</h5>
+                    <ul>
+                        @{
+                            List<AvailableSub> subsForThisSchool = _subRepo.GetEnabledForSchoolGUID(schoolGuid).ToList();
+                        }
+
+                        @if (subsForThisSchool.Count > 0) 
+                        {
+                            @foreach(AvailableSub sub in _subRepo.GetEnabled())
+                            {
+                                <li>@sub.DisplayName</li>                              
+                            }
+                        } else {
+                            <li><i style="color: #808080;">None.</i></li>
+
+                        }
+                        
+                    </ul>
+                    <br/>
+                }
+            }
+            
+            <br/><br/>
+            
 
         </div>     
     </Authorized>

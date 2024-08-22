@@ -1,12 +1,48 @@
 @page "/Notify"
+@using SubNotify.Core
+@using SubNotify.FrontEnd.Services
+@using System.Security.Claims
 
-<div class="page_container">
-<h1>Notify</h1>
-<a href="/">Back to home</a>
-<br/><br/>
+@code {
+    [Inject]
+    PermissionsManager? _permissionsManager { get; set; }
 
-<ul>
-    <li>Form goes here for school staff to fill out</li>
-    <li>It should know what school a user has access to based on their group memberships (in the permissions section)</li>
-</ul>
-</div>
+    [Inject]
+    SchoolService? _schoolRepo { get; set; }
+    
+    [Inject]
+    AvailableSubService? _subRepo { get; set; }
+}
+<PageTitle>Notify SIS team of a sub</PageTitle>
+
+<AuthorizeView>
+     <Authorized>
+        <div class="page_container">
+            <h1>Sub notifications</h1>
+            <a href="/">Back to home</a>
+            <br/><br/><br/>
+
+            <h2>Notify SIS team of a sub</h2>
+            <p>Use this form to notify the SIS team of a substitute secretary for your school.</p>
+
+            Sub will be working at: (school)
+            Sub will be starting on: (start date)
+            Sub's last day will be: (end date)
+            Sub needs access to school email: (yes/no)
+
+            <br/><br/>
+            <h2>Upcoming substitutes</h2>
+            School - Start date - End date - Sub name
+
+
+            <br/><br/>
+            <h2>Active subsitutes</h2>
+            School - Start date - End date - Sub name
+
+        </div>
+        <br/><br/><br/><br/><br/>
+     </Authorized>
+     <NotAuthorized>
+         <p>Not Authorized</p>
+     </NotAuthorized>
+ </AuthorizeView>

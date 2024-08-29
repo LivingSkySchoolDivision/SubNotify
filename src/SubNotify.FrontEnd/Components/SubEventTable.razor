@@ -1,0 +1,37 @@
+@using SubNotify.Core
+@using SubNotify.FrontEnd.Services
+@code {
+
+
+    [Parameter]
+    public List<SubEvent> Events { get; set; }
+
+    protected override void OnInitialized()
+    {        
+    }
+}
+
+<table class="table">
+<thead>
+    <tr>
+        <th>From</th>
+        <th>To</th>
+        <th>Substitute</th>
+        <th>Notifier</th> 
+        <th style="text-align: center;">Email access</th> 
+        <th>Requested on</th> 
+    </tr>
+</thead>
+
+@foreach(SubEvent subEvent in Events.OrderBy(x => x.StartDate).ThenBy(x => x.EndDate))
+{   
+    <tr>
+        <td style="padding: 5px;border-bottom: 1px solid #C0C0C0;">@(subEvent.StartDate.ToLongDateString())</td>
+        <td style="padding: 5px;border-bottom: 1px solid #C0C0C0;">@(subEvent.EndDate.ToLongDateString())</td>
+        <td style="padding: 5px;border-bottom: 1px solid #C0C0C0;">@(subEvent.SubName)</td>
+        <td style="padding: 5px;border-bottom: 1px solid #C0C0C0;">@(subEvent.RequestorName)</td>
+        <td style="padding: 5px;border-bottom: 1px solid #C0C0C0;text-align: center;">@(subEvent.SubNeedsAccessToEmail ? "✅" : "")</td>
+        <td style="padding: 5px;border-bottom: 1px solid #C0C0C0;">@(subEvent.RequestedTimestampUTC.ToLongDateString())</td>
+    </tr>
+}
+</table>

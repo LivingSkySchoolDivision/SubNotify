@@ -1,0 +1,21 @@
+@page "/ThankYou"
+
+<PageTitle>Thanks!</PageTitle>
+
+<AuthorizeView>
+     <Authorized>
+        <br/>
+        <div class="page_container"> 
+            <div style="text-align:center;">
+                <img src="/img/happy-00.svg" style="width: 300px; margin: 15px;">
+            </div>           
+            <br/>
+            <h1>Thank you for notifying us!</h1>
+            <p>Thank you for letting us know about your sub secretary! Advanced notice helps us ensure that their account is set up with the access that they will need when they arrive.</p>
+            <p style="text-align: center;"><a href="/">Click here to return to the main menu</a></p>
+        </div>
+     </Authorized>
+     <NotAuthorized>
+         <p>Not Authorized</p>
+     </NotAuthorized>
+ </AuthorizeView>

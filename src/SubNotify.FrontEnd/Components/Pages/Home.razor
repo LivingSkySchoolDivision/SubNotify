@@ -1,4 +1,5 @@
 ﻿@page "/"
+@using SubNotify.Core
 @using System.Security.Claims
 @using SubNotify.FrontEnd.Services
 
@@ -6,23 +7,59 @@
 
     [Inject]
     PermissionsManager? _permissionsManager { get; set; }
+    
+    [Inject]
+    SchoolService? _schoolService { get; set; }
+    
+    [Inject ]
+    AuthenticationStateProvider? AuthenticationStateProvider { get; set;}
+    
+
+    List<School> userSchools = new List<School>();
+    Dictionary<Guid, School> schoolsByID = new Dictionary<Guid, School>();
+    Dictionary<School,AvailableSub> schoolAvailableSubs = new Dictionary<School,AvailableSub>();
+    GroupPermission userPermissions = new GroupPermission();
+
+
+
+    protected override async Task OnInitializedAsync()
+    { 
+        List<School> allSchools = _schoolService?.GetAll().OrderBy(x => x.Name).ToList() ?? new List<School>();
+        schoolsByID = allSchools.ToDictionary(x => x.Id);
+
+        if (AuthenticationStateProvider != null)
+        {
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            ClaimsPrincipal user = authState.User;
+            userPermissions = _permissionsManager.GetCombinedPermissions(user);
+        }   
+        
+        // Load this user's schools
+
+    }
 }
 
 <PageTitle>Home</PageTitle>
 
 <AuthorizeView>
      <Authorized>
-        <br/><br/><br/>
+        <br/>
         <div class="home_page_container">
-            <div style="text-align: center;">
-                <h1 style="font-weight: bold; border-bottom: 1px solid #C0C0C0;">Main Menu</h1>
+            <div style="text-align: center; border-bottom: 1px solid #C0C0C0;">
+                <h2>Main Menu</h2>
             </div>
-            <div class="main_nav_container">
-
+            <div class="main_nav_container">                
                 <a class="menu_link" href="/Notify">
                     <div class="main_nav_button">
                         <div class="main_nav_button_icon"><img src="/img/substitute.svg"></div>
                         <div class="main_nav_button_text">Notify SIS of an upcoming substitute secretary</div>
+                    </div>
+                </a>
+
+                <a class="menu_link" href="/Upcoming">
+                    <div class="main_nav_button">
+                        <div class="main_nav_button_icon"><img src="/img/upcoming.svg"></div>
+                        <div class="main_nav_button_text">View upcoming and active subs</div>
                     </div>
                 </a>
 
@@ -35,6 +72,21 @@
 
             </div>
             <br/>
+
+            <div style="text-align: center;">
+                <h4 style="border-bottom: 1px solid #C0C0C0;">Schools that you have access to</h4>
+                <div style="display: flex; flex-wrap: wrap; justify-content: center; font-size: 0.75em;">
+                @foreach(Guid schoolGuid in userPermissions.SchoolGUIDs)
+                {
+                    @if (schoolsByID.ContainsKey(schoolGuid)) {
+                        School thisSchool = schoolsByID[schoolGuid];
+                        <div style="display: inline; padding: 4px;margin: 5px;">@(thisSchool.Name)</div>
+                    }
+                }
+                </div>
+            </div>
+
+            <br/><br/><br/>
             <div class="main_nav_container">
             @if (_permissionsManager?.CanManageSchoolList(context?.User) ?? false)
             {
@@ -67,6 +119,9 @@
             }
 
             </div>
+            
+            <br/>    
+
 
         </div>
 

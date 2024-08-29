@@ -1,0 +1,290 @@
+@page "/Notify/{schoolguid}"
+@using SubNotify.Core
+@using SubNotify.FrontEnd.Services
+@using System.Security.Claims
+
+@code {
+    [Inject]
+    PermissionsManager? _permissionsManager { get; set; }
+
+    [Inject]
+    SchoolService? _schoolService { get; set; }
+
+    [Inject]
+    AvailableSubService? _availableSubRepo { get; set; }
+
+    [Inject]
+    SubEventService? _subEventService { get; set; }
+
+    [Inject]
+    NavigationManager? NavigationManager { get; set; }
+
+    [Inject ]
+    AuthenticationStateProvider? AuthenticationStateProvider { get; set;}
+
+    [Inject]
+    AvailableSubService? _subRepo { get; set; }
+
+
+
+    [Parameter]
+    public string? schoolguid { get; set; }
+
+    SubEvent? newSubEvent = null;
+    School? selectedSchool = null;
+
+    Dictionary<Guid, School> schoolsByID = new Dictionary<Guid, School>();
+
+    List<AvailableSub> displayedAvailableSubs = new List<AvailableSub>();
+
+    GroupPermission userPermissions = new GroupPermission();
+
+    List<SubEvent> upcomingSubs = new List<SubEvent>();
+    List<SubEvent> activeSubs = new List<SubEvent>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        List<School> allSchools = _schoolService?.GetAll().OrderBy(x => x.Name).ToList() ?? new List<School>();
+        schoolsByID = allSchools.ToDictionary(x => x.Id);
+
+        // Try to parse the given school
+        if (!string.IsNullOrEmpty(schoolguid))
+        {
+            try {
+                Guid selectedSchoolGUID = Guid.Parse(schoolguid);
+
+                if (schoolsByID.ContainsKey(selectedSchoolGUID))
+                {
+                    selectedSchool = schoolsByID[selectedSchoolGUID];
+                }
+            }
+            catch {}
+
+            // Load the available subs for this school
+            displayedAvailableSubs = _subRepo.GetEnabledForSchoolGUID(selectedSchool.Id).ToList();  
+
+            // Build out defaults for new event
+            newSubEvent = new SubEvent() {
+                StartDate = DateTime.Today.AddDays(1),
+                EndDate = DateTime.Today.AddDays(2),
+                SubNeedsAccessToEmail = true,
+                RequestedTimestampUTC = DateTime.Now,
+                SchoolGUID = selectedSchool.Id,
+                SchoolName = selectedSchool.Name
+            };
+            
+            if (AuthenticationStateProvider != null)
+            {
+                var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+                ClaimsPrincipal user = authState.User;
+                userPermissions = _permissionsManager.GetCombinedPermissions(user);
+
+                newSubEvent.RequestorName = user?.Identity?.Name ?? "Unknown";           
+                
+                // Find some other values from claims to include in the request
+                foreach(Claim claim in user?.Claims ?? new List<Claim>())
+                {
+                    if (claim.Type == "http://schemas.microsoft.com/identity/claims/objectidentifier")
+                    {
+                        newSubEvent.RequestorOID = claim.Value;
+                    }
+
+                    if (claim.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress")
+                    {
+                        newSubEvent.RequestorEmail = claim.Value;
+                    }
+                }
+            }
+
+            if (displayedAvailableSubs.Count > 0) 
+            {
+                newSubEvent.SubGUID = displayedAvailableSubs.First<AvailableSub>().Id;
+            } 
+
+            // Load upcoming and active sub events
+            upcomingSubs = _subEventService.GetUpcoming(selectedSchool);
+            activeSubs = _subEventService.GetActive(selectedSchool);         
+        }
+    }
+
+    protected void HandleInValidSubmit()
+    {
+        // Do nothing
+    }
+
+    protected void HandleValidSubmit()
+    {
+        if (newSubEvent != null)
+        {
+            
+            // Fill in the sub name from the GUID
+            foreach(AvailableSub sub in displayedAvailableSubs)
+            {
+                
+                if (sub.Id == newSubEvent.SubGUID) 
+                {
+                    newSubEvent.SubName = sub.DisplayName;
+                }
+            }
+
+            // Update the request timestamp (in case the user sat on the request page for days)
+            newSubEvent.RequestedTimestampUTC = DateTime.Now;            
+
+            Console.WriteLine(newSubEvent);
+
+            // Sub even repo
+            _subEventService?.InsertOrUpdate(newSubEvent);
+            
+            // Navigate back
+            NavigationManager?.NavigateTo("/ThankYou");
+        }        
+    }
+
+}
+<PageTitle>Notify SIS team of a sub</PageTitle>
+
+<AuthorizeView>
+     <Authorized Context="AuthorizedUser">
+        <div class="page_container">
+            <h1>Sub notifications</h1>
+            <a href="/">Back to home</a>
+            <br/><br/><br/>
+
+
+            @if (selectedSchool != null)
+            {
+               <h2>Notify SIS team of an upcoming substitute secretary</h2>
+                <p>Use this form to notify the SIS team of a substitute secretary for your school.</p>
+
+                <br/><br/>
+                <EditForm FormName="PermissionEditForm" Model="@newSubEvent" OnValidSubmit="@HandleValidSubmit" OnInvalidSubmit="@HandleInValidSubmit">
+                    <DataAnnotationsValidator />
+
+                    <div class="container">
+
+                        <div class="row form-group">
+                            <div class="col-3 col-form-label">
+                                <label for="schoolGUID">School: </label>
+                            </div>
+                            <div class="col-9 col-form-label">
+                                <b>@(newSubEvent.SchoolName)</b><br/>                                
+                            </div>
+                        </div>
+
+                        <br/>
+
+                        <div class="row form-group">
+                            <div class="col-3 col-form-label">
+                                <label for="startDate">Start Date: </label>
+                            </div>
+                            <div class="col-9">
+                                <InputDate id="startDate" class="form-control" @bind-Value="@newSubEvent.StartDate"></InputDate>
+                            </div>
+                        </div>
+
+                        <br/>
+
+                        <div class="row form-group">
+                            <div class="col-3 col-form-label">
+                                <label for="endDate">End Date: </label>
+                            </div>
+                            <div class="col-9">
+                                <InputDate id="endDate" class="form-control" @bind-Value="@newSubEvent.EndDate"></InputDate>
+                            </div>
+                        </div>
+
+                        <br/>
+
+                        <div class="row form-group">
+                            <div class="col-3 col-form-label">
+                                <label for="subGUID">Substitute: </label>
+                            </div>
+                            <div class="col-9">
+                                @if (displayedAvailableSubs.Count > 0)
+                                {                                  
+                                    <InputSelect id="subGUID" class="form-control form-control-sm" @bind-Value="@newSubEvent.SubGUID">
+                                        @foreach(AvailableSub sub in displayedAvailableSubs)
+                                        {
+                                            <option value="@(sub.Id)">@(sub.DisplayName)</option>
+                                        }
+
+                                    </InputSelect>  
+                                } else {
+                                    <i>No available substitutes for @(selectedSchool.Name), please contact the Help Desk to set one up.</i>
+                                }
+                            </div>
+                        </div>
+
+                        <br/>
+
+                        <div class="row form-group">
+                            <div class="col-3 col-form-label">
+                            </div>
+                            <div class="col-9">
+                                <InputCheckbox id="blnEmailAccess" class="form-check-input" @bind-Value="@newSubEvent.SubNeedsAccessToEmail"></InputCheckbox>
+                                <label for="blnEmailAccess" class="form-check-label">Sub will need access to the school email mailbox</label>
+                            </div>
+                        </div>
+
+                        <br/>
+
+                        <div class="row form-group">
+                            <div class="col-3 col-form-label">
+                                <label for="requestedBy">Requested by: </label>
+                            </div>
+                            <div class="col-9">
+                                @(newSubEvent.RequestorName) (@(newSubEvent.RequestorEmail))
+                            </div>
+                        </div>
+
+                        <br/>
+
+                        <div class="row form-group">
+                            <div class="col col-form-label" style="text-align: right;">
+                                @if (displayedAvailableSubs.Count > 0)
+                                {   
+                                    <button type="submit" class="btn btn-primary btn-block">Submit</button>
+                                } else {
+                                    <i>Requires at least one available sub to submit form</i>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <br/><br/>
+
+                </EditForm>
+
+                <h3>Don't see the substitute listed?</h3>
+                <p>The SIS department needs to know when your sub list changes. If you need a sub that isn't listed, please see instructions on the <a href="/SubList/">Sub List page</a>.</p>
+
+                @if(activeSubs.Count > 0)
+                {
+                    <br/><br/><br/><br/>
+                    <h2>Active subsitutes</h2>
+                    <SubEventTable Events="@(activeSubs)" />
+                }
+
+                @if(upcomingSubs.Count > 0)
+                {
+                    <br/><br/><br/><br/>
+                    <h2>Upcoming substitutes</h2>
+                    <SubEventTable Events="@(upcomingSubs)" />
+                }
+
+            } else {
+                <h3>Invalid school</h3>
+                <p>The specified school does not exist.</p>
+            }
+
+            <br/>
+
+        </div>
+
+
+        <br/><br/><br/><br/><br/>
+     </Authorized>
+     <NotAuthorized>
+         <p>Not Authorized</p>
+     </NotAuthorized>
+ </AuthorizeView>

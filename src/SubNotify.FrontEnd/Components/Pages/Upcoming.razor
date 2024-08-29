@@ -1,0 +1,80 @@
+@page "/Upcoming"
+@using SubNotify.FrontEnd.Services
+@using System.Security.Claims
+@using SubNotify.Core
+
+@code {
+    [Inject]
+    PermissionsManager? _permissionsManager { get; set; }
+
+    [Inject]
+    SchoolService? _schoolService { get; set; }
+
+    [Inject]
+    SubEventService? _subEventService { get; set; }
+
+    [Inject ]
+    AuthenticationStateProvider? AuthenticationStateProvider { get; set;}
+
+    Dictionary<Guid, School> schoolsByID = new Dictionary<Guid, School>();
+
+    GroupPermission userPermissions = new GroupPermission();
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        List<School> allSchools = _schoolService?.GetAll().OrderBy(x => x.Name).ToList() ?? new List<School>();
+        schoolsByID = allSchools.ToDictionary(x => x.Id);
+
+        if (AuthenticationStateProvider != null)
+        {
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            ClaimsPrincipal user = authState.User;
+            userPermissions = _permissionsManager.GetCombinedPermissions(user);
+        }
+    }
+}
+<AuthorizeView>
+     <Authorized>
+        <div class="page_container">
+            <h1>Active and Upcoming Subs</h1>
+            <a href="/">Back to home</a>
+            <br/><br/><br/>
+            <p>Below is the list of active or upcoming sub secretaries for all schools that you have access to.</p>
+
+            @foreach(Guid schoolGuid in userPermissions.SchoolGUIDs)
+            {
+                @if (schoolsByID.ContainsKey(schoolGuid)) {
+                    School thisSchool = schoolsByID[schoolGuid];
+                    List<SubEvent> active = _subEventService.GetActive(thisSchool).ToList();
+                    List<SubEvent> upcoming = _subEventService.GetUpcoming(thisSchool).ToList();
+
+                    @if((active.Count > 0) || upcoming.Count > 0)
+                    {
+                        <h1>@(thisSchool.Name)</h1>
+
+                        @if (active.Count > 0)
+                        {
+                            <h2>Active</h2>
+                            <SubEventTable Events="@(active)" />
+                        }
+
+                        @if (upcoming.Count > 0)
+                        {
+                            <h2>Upcoming</h2>
+                            <SubEventTable Events="@(upcoming)" />
+                        }
+                    }
+                    <br/><br/><br/>
+                }
+            }
+
+            <br/><br/>
+
+
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <p>Not Authorized</p>
+    </NotAuthorized>
+</AuthorizeView>

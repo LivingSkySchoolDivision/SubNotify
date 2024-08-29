@@ -60,25 +60,20 @@
             {
                 @if (schoolsByID.ContainsKey(schoolGuid)) {
                     School thisSchool = schoolsByID[schoolGuid];
+                    List<AvailableSub> subsForThisSchool = _subRepo.GetEnabledForSchoolGUID(schoolGuid).ToList();
 
-                    <h5>@(thisSchool.Name)</h5>
-                    <ul>
-                        @{
-                            List<AvailableSub> subsForThisSchool = _subRepo.GetEnabledForSchoolGUID(schoolGuid).ToList();
-                        }
-
-                        @if (subsForThisSchool.Count > 0) 
-                        {
+                    @if (subsForThisSchool.Count > 0) 
+                    {                    
+                        <h5>@(thisSchool.Name)</h5>
+                        <ul>
                             @foreach(AvailableSub sub in _subRepo.GetEnabled())
                             {
                                 <li>@sub.DisplayName</li>                              
-                            }
-                        } else {
-                            <li><i style="color: #808080;">None.</i></li>
-
-                        }
-                        
-                    </ul>
+                            }                        
+                        </ul>
+                    } else {
+                        <h5>@(thisSchool.Name) <i>(None)</i></h5>
+                    }
                     <br/>
                 }
             }

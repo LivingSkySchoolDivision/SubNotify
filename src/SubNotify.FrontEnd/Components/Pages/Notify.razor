@@ -3,41 +3,83 @@
 @using SubNotify.FrontEnd.Services
 @using System.Security.Claims
 
+@*
+    This file's entire purpose is to select a school and pass on the request to the "NotifySpecific" page.
+    If the user has only one school attached, they should be moved along automatically to the next step.
+*@
+
 @code {
+
     [Inject]
     PermissionsManager? _permissionsManager { get; set; }
 
     [Inject]
-    SchoolService? _schoolRepo { get; set; }
+    SchoolService? _schoolService { get; set; }
     
     [Inject]
-    AvailableSubService? _subRepo { get; set; }
+    NavigationManager? NavigationManager { get; set; } 
+    
+    [Inject ]
+    AuthenticationStateProvider? AuthenticationStateProvider { get; set;}
+
+    List<Guid> userSchoolGUIDs = new List<Guid>();
+    
+    Dictionary<Guid, School> schoolsByID = new Dictionary<Guid, School>();
+
+    GroupPermission userPermissions = new GroupPermission();
+
+
+    protected override async Task OnInitializedAsync()
+    { 
+        List<School> allSchools = _schoolService?.GetAll().OrderBy(x => x.Name).ToList() ?? new List<School>();
+        schoolsByID = allSchools.ToDictionary(x => x.Id);
+            
+        if (AuthenticationStateProvider != null)
+        {
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            ClaimsPrincipal user = authState.User;
+            userPermissions = _permissionsManager.GetCombinedPermissions(user);
+        }   
+
+        userSchoolGUIDs = userPermissions.SchoolGUIDs;
+
+        if (userSchoolGUIDs.Count == 1)
+        {
+            NavigationManager?.NavigateTo("/Notify/" + userSchoolGUIDs.First<Guid>().ToString());
+        }
+    }
 }
 <PageTitle>Notify SIS team of a sub</PageTitle>
 
 <AuthorizeView>
-     <Authorized>
+     <Authorized Context="AuthorizedUser">
         <div class="page_container">
             <h1>Sub notifications</h1>
             <a href="/">Back to home</a>
             <br/><br/><br/>
 
-            <h2>Notify SIS team of a sub</h2>
-            <p>Use this form to notify the SIS team of a substitute secretary for your school.</p>
+            @if(userSchoolGUIDs.Count > 0) 
+            {
+                <div style="text-align: center; display: flex; width: 100%; flex-wrap: wrap;justify-content: center; align-items: center;">
 
-            Sub will be working at: (school)
-            Sub will be starting on: (start date)
-            Sub's last day will be: (end date)
-            Sub needs access to school email: (yes/no)
-
-            <br/><br/>
-            <h2>Upcoming substitutes</h2>
-            School - Start date - End date - Sub name
-
-
-            <br/><br/>
-            <h2>Active subsitutes</h2>
-            School - Start date - End date - Sub name
+                    @foreach(Guid schoolGuid in userSchoolGUIDs)
+                    {
+                        @if (schoolsByID.ContainsKey(schoolGuid)) 
+                        {
+                            School thisSchool = schoolsByID[schoolGuid];
+                            <a class="menu_link" href="/Notify/@(schoolGuid)">
+                                <div class="main_nav_button">
+                                    <div class="main_nav_button_icon"><img src="/img/school.svg"></div>
+                                    <div class="main_nav_button_text">@(thisSchool.Name)</div>
+                                </div>
+                            </a>        
+                        }
+                    }
+                </div>
+            } else {
+                <h3>No Schools</h3>
+                <p>Sorry, you do not have access to any schools.</p>
+            }
 
         </div>
         <br/><br/><br/><br/><br/>

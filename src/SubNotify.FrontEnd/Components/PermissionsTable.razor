@@ -82,13 +82,19 @@
         @if (@ShowSchoolList)
         {
             <td style="border-bottom: 1px solid #C0C0C0;">
-                <div class="small">
-                @foreach(Guid schoolid in perm.SchoolGUIDs)
+                @if (perm.CanSeeAllSchools) 
                 {
-                    @(translateSchoolName(schoolid))
-                    <br/>
-                }
-                </div>
+                    <i>All</i>
+                } else {
+                    <div class="small">
+                    @foreach(Guid schoolid in perm.SchoolGUIDs)
+                    {
+                        @(translateSchoolName(schoolid))
+                        <br/>
+                    }
+                    </div>
+                }               
+                
             </td>
         }
     </tr>

@@ -14,6 +14,7 @@ public class SubEvent : IGUIDable
     public Guid SchoolGUID { get; set; }
     public string SchoolName { get; set; }
     public bool SubNeedsAccessToEmail { get; set; }
+    public bool NotificationSent { get; set; } = false;
 
     public override string ToString()
     {
@@ -31,6 +32,7 @@ public class SubEvent : IGUIDable
         SchoolGUID: " + this.SchoolGUID.ToString() + @"
         SchoolName: " + this.SchoolName + @"
         NeedEmailAccess: " + this.SubNeedsAccessToEmail + @"
+        Notified: " + this.NotificationSent + @"
     }
             ";
 

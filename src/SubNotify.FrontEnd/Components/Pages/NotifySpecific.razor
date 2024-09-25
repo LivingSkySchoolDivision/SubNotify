@@ -66,7 +66,7 @@
             // Build out defaults for new event
             newSubEvent = new SubEvent() {
                 StartDate = DateTime.Today.AddDays(1),
-                EndDate = DateTime.Today.AddDays(2),
+                EndDate = DateTime.Today.AddDays(1),
                 SubNeedsAccessToEmail = true,
                 RequestedTimestampUTC = DateTime.Now,
                 SchoolGUID = selectedSchool.Id,
@@ -230,6 +230,28 @@
 
                         <div class="row form-group">
                             <div class="col-3 col-form-label">
+                                <label for="subGUID">Which secretary is away?: </label>
+                            </div>
+                            <div class="col-9">                                
+                                <InputText id="notes" class="form-control" @bind-Value="@newSubEvent.SubstituteFor"></InputText>
+                            </div>
+                        </div>
+                        
+                        <br/>
+
+                        <div class="row form-group">
+                            <div class="col-3 col-form-label">
+                                <label for="subGUID">Additional notes: </label>
+                            </div>
+                            <div class="col-9">                                
+                                <InputTextArea id="notes" class="form-control" @bind-Value="@newSubEvent.Notes"></InputTextArea>
+                            </div>
+                        </div>
+
+                        <br/>
+
+                        <div class="row form-group">
+                            <div class="col-3 col-form-label">
                                 <label for="requestedBy">Requested by: </label>
                             </div>
                             <div class="col-9">
@@ -238,6 +260,7 @@
                         </div>
 
                         <br/>
+
 
                         <div class="row form-group">
                             <div class="col col-form-label" style="text-align: right;">

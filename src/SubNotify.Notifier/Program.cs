@@ -17,7 +17,7 @@ namespace SubNotify.Notifier
             Console.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm K") + ": " + message);
         }
 
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {   
             // Load configuration
             IConfiguration configuration = new ConfigurationBuilder()
@@ -25,104 +25,60 @@ namespace SubNotify.Notifier
                 .AddUserSecrets<Program>()
                 .Build();
             
-            // Do sanity checks on the SMTP data from config
-            
-        
             // Load time zone
             TimeZoneInfo timeZone = TimeZoneInfo.FindSystemTimeZoneById(configuration["Settings:TimeZone"]);
-            ConsoleWrite($"Time zone: {timeZone}");
 
             // Set up database connection
             string dbConnectionString = configuration.GetConnectionString("Internal") ?? string.Empty;
-            MongoDbConnection mongoDatabase = new MongoDbConnection(dbConnectionString);
-        
-            IConfigurationSection smtpConfig = configuration.GetSection("SMTP");
-            SMTPConnectionDetails smtpInfo = new SMTPConnectionDetails()
-            {
-                Host = smtpConfig["hostname"],
-                Port = int.Parse(smtpConfig["port"]),
-                Username = smtpConfig["username"],
-                Password = smtpConfig["password"],
-                ReplyToAddress = smtpConfig["replytoaddress"],
-                To = smtpConfig["to"],
-                FromAddress = smtpConfig["fromaddress"]
-            };            
+            MongoDbConnection mongoDatabase = new MongoDbConnection(dbConnectionString);            
+
+            string jira_username = configuration["Settings:JiraUsername"] ?? string.Empty;
+            string jira_api_key = configuration["Settings:JiraAPIKey"] ?? string.Empty;
+            string jira_domain = configuration["Settings:JiraDomain"] ?? string.Empty;
+
+            // 
+
+            JiraAPI Jira = new JiraAPI(jira_username, jira_api_key, jira_domain);
 
             while (true)
             {
                 // Load any sub events that have come in that hvae notify set to false
                 MongoRepository<SubEvent> subEventRepo = new MongoRepository<SubEvent>(mongoDatabase);
 
-                List<SubEvent> subEvents = subEventRepo.Find(x => x.NotificationSent == false).ToList<SubEvent>();
+                // Load any events that need an onboarding ticket created
+                // Load any events that need an offboarding ticket created
+                List<SubEvent> subEvents = subEventRepo.Find(x => (x.TicketCreated_Onboard == false) || (x.TicketCreated_Offboard == false)).ToList<SubEvent>();
 
-
+                Console.WriteLine($"{DateTime.Now.ToString("yyyy-MM-dd-HH:mm:ss")} Found {subEvents.Count} events to notify for...");
                 if (subEvents.Count > 0) 
                 {
-                    using (SmtpClient smtpClient = new SmtpClient(smtpInfo.Host)
+                    // Create onboarding tickets
+                    foreach(SubEvent e in subEvents.Where(x => x.TicketCreated_Onboard == false)) 
                     {
-                        Port = smtpInfo.Port,
-                        UseDefaultCredentials = false,
-                        EnableSsl = true,
-                        Credentials = new NetworkCredential(smtpInfo.Username, smtpInfo.Password)
-                    })
-                    {
-                        foreach(SubEvent e in subEvents)
-                        {
-                            Console.WriteLine($"Sending notification for Id {e.Id.ToString()}");
-
-                            MailMessage msg = new MailMessage();                
-                            msg.To.Add(smtpInfo.To);
-                            msg.Body = GenerateEmailBody(e, timeZone);
-                            msg.Subject = GenerateEmailSubject(e);
-                            msg.From = new MailAddress(smtpInfo.FromAddress, "SubNotify");
-                            msg.ReplyToList.Add(new MailAddress(smtpInfo.ReplyToAddress, "SubNotify"));
-                            msg.IsBodyHtml = true;                         
-                            smtpClient.Send(msg);
-                        }
+                        Console.Write($"{DateTime.Now.ToString("yyyy-MM-dd-HH:mm:ss")} > Creating onboarding ticket for request {e.Id}...");
+                        e.TicketCreated_Onboard = await Jira.CreateOnboardingTicket(e);
+                        e.LastNotifyTimestamp = DateTime.Now;                        
+                        subEventRepo.Update(e);              
+                        Console.WriteLine(e.TicketCreated_Onboard ? "SUCCESS" : "FAILURE");
                     }
+                    Task.Delay(5000).Wait();
+
+                    // Create offboarding tickets
+                    foreach(SubEvent e in subEvents.Where(x => x.TicketCreated_Offboard == false)) 
+                    {
+                        Console.Write($"{DateTime.Now.ToString("yyyy-MM-dd-HH:mm:ss")} > Creating offboarding ticket for request {e.Id}...");
+                        e.TicketCreated_Offboard = await Jira.CreateOffboardingTicket(e);
+                        e.LastNotifyTimestamp = DateTime.Now;
+                        subEventRepo.Update(e);
+                        Console.WriteLine(e.TicketCreated_Onboard ? "SUCCESS" : "FAILURE");
+                    }
+                    Task.Delay(5000).Wait();                    
                 }
 
                 // Sleep
-                ConsoleWrite($"Sleeping for {_sleepMinutes} minutes...");
+                Console.WriteLine($"{DateTime.Now.ToString("yyyy-MM-dd-HH:mm:ss")}: Sleeping for {_sleepMinutes} minutes...");
                 Task.Delay(_sleepMinutes * 60 * 1000).Wait();
             }
-        }
-
-        private static string GenerateEmailSubject(SubEvent subEvent)
-        {
-            return $"Substitute Secretary - {subEvent.StartDate.ToShortDateString()} to {subEvent.EndDate.ToShortDateString()} - {subEvent.SchoolName}";
-        }
-
-        private static string GenerateEmailBody(SubEvent subEvent, TimeZoneInfo timezone) 
-        {
-
-            StringBuilder msgBody = new StringBuilder();
-
-            msgBody.Append("<html>");
-            msgBody.Append("<body>");
-            msgBody.Append("<h3>Substitute Secretary Notification</h3>");
-            msgBody.Append("<p>A substitute secretary notification has been submitted - see details below.</p>");
-            msgBody.Append("<table>");
-
-            msgBody.Append($"<tr><td><b>Submitted timestamp:</b></td><td>{TimeZoneInfo.ConvertTimeFromUtc(subEvent.RequestedTimestampUTC, timezone).ToLongDateString()} {subEvent.RequestedTimestampUTC.ToLongTimeString()}</td></tr>");
-            msgBody.Append($"<tr><td><b>School:</b></td><td>{subEvent.SchoolName}</td></tr>");
-            msgBody.Append($"<tr><td><b>Submitted by:</b></td><td>{subEvent.RequestorName} ({subEvent.RequestorEmail})</td></tr>");
-            
-            msgBody.Append($"<tr><td><b>Start Date:</b></td><td>{subEvent.StartDate.ToLongDateString()}</td></tr>");
-            msgBody.Append($"<tr><td><b>End Date:</b></td><td>{subEvent.EndDate.ToLongDateString()}</td></tr>");
-            msgBody.Append($"<tr><td><b>Substitute:</b></td><td>{subEvent.SubName}</td></tr>");
-            msgBody.Append($"<tr><td><b>Needs access to email?:</b></td><td>{(subEvent.SubNeedsAccessToEmail ? "✅ YES" : "⛔ no")}</td></tr>");
-            msgBody.Append($"<tr><td><b>Request ID:</b></td><td>{subEvent.Id.ToString()}</td></tr>");
-
-            msgBody.Append("</table>");
-            msgBody.Append("<p>To enable Teams notifications for the ticket that this email creates, set the \"Due Date\" field in Jira to one (1) work day (or more) before the \"Start Date\" listed above. This will trigger an alert to Teams every day at 3:00pm for any ticket due in the next day.</p>");            
-            msgBody.Append("<p>The \"Request ID\" can be used to find this record in the SubNotify internal database, if troubleshooting is required.</p>");
-            msgBody.Append("<p>This email was sent from an automated script, using an unmonitored mailbox. If you require further information, contact the requestor or school listed above.</p>");
-            msgBody.Append("</body>");
-            msgBody.Append("</html>");
-
-            return msgBody.ToString();
-            
         }
     }
 }

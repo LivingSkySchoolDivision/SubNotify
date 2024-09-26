@@ -25,7 +25,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        List<School> allSchools = _schoolService?.GetAll().OrderBy(x => x.Name).ToList() ?? new List<School>();
+        List<School> allSchools = _schoolService?.GetEnabled().OrderBy(x => x.Name).ToList() ?? new List<School>();
         schoolsByID = allSchools.ToDictionary(x => x.Id);
 
         if (AuthenticationStateProvider != null)

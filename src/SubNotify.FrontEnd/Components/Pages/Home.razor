@@ -7,13 +7,16 @@
 
     [Inject]
     PermissionsManager? _permissionsManager { get; set; }
-    
+
     [Inject]
     SchoolService? _schoolService { get; set; }
-    
+
+    [Inject]
+    SubEventService? _subEventService { get; set; }
+
     [Inject ]
     AuthenticationStateProvider? AuthenticationStateProvider { get; set;}
-    
+
 
     List<School> userSchools = new List<School>();
     Dictionary<Guid, School> schoolsByID = new Dictionary<Guid, School>();
@@ -23,8 +26,8 @@
 
 
     protected override async Task OnInitializedAsync()
-    { 
-        List<School> allSchools = _schoolService?.GetAll().OrderBy(x => x.Name).ToList() ?? new List<School>();
+    {
+        List<School> allSchools = _schoolService?.GetEnabled().OrderBy(x => x.Name).ToList() ?? new List<School>();
         schoolsByID = allSchools.ToDictionary(x => x.Id);
 
         if (AuthenticationStateProvider != null)
@@ -32,8 +35,8 @@
             var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
             ClaimsPrincipal user = authState.User;
             userPermissions = _permissionsManager.GetCombinedPermissions(user);
-        }   
-        
+        }
+
         // Load this user's schools
 
     }
@@ -43,23 +46,37 @@
 
 <AuthorizeView>
      <Authorized>
+
+        <div style="text-align: right; font-size: 10pt;">
+            @if (_permissionsManager?.CanManageSchoolList(context?.User) ?? false)
+            {
+                <a class="admin_main_menu_link" href="/ManageSchools">Manage school list</a>
+            }
+
+            @if (_permissionsManager?.CanManageSubList(context?.User) ?? false)
+            {
+                <a class="admin_main_menu_link" href="/ManageSubList">Manage sub list</a>
+            }
+
+            @if (_permissionsManager?.CanManagePermissions(context?.User) ?? false)
+            {
+                <a class="admin_main_menu_link" href="/ManagePermissions">Manage permissions</a>
+            }
+
+            <br/>
+
+
+        </div>
+
+
         <br/>
         <div class="home_page_container">
-            <div style="text-align: center; border-bottom: 1px solid #C0C0C0;">
-                <h2>Main Menu</h2>
-            </div>
-            <div class="main_nav_container">                
+            <div class="main_nav_container">
+
                 <a class="menu_link" href="/Notify">
                     <div class="main_nav_button">
                         <div class="main_nav_button_icon"><img src="/img/substitute.svg"></div>
                         <div class="main_nav_button_text">Notify SIS of an upcoming substitute secretary</div>
-                    </div>
-                </a>
-
-                <a class="menu_link" href="/Upcoming">
-                    <div class="main_nav_button">
-                        <div class="main_nav_button_icon"><img src="/img/upcoming.svg"></div>
-                        <div class="main_nav_button_text">View upcoming and active subs</div>
                     </div>
                 </a>
 
@@ -73,57 +90,34 @@
             </div>
             <br/>
 
-            <div style="text-align: center;">
-                <h4 style="border-bottom: 1px solid #C0C0C0;">Schools that you have access to</h4>
-                <div style="display: flex; flex-wrap: wrap; justify-content: center; font-size: 0.75em;">
-                @foreach(Guid schoolGuid in userPermissions.SchoolGUIDs)
-                {
-                    @if (schoolsByID.ContainsKey(schoolGuid)) {
-                        School thisSchool = schoolsByID[schoolGuid];
-                        <div style="display: inline; padding: 4px;margin: 5px;">@(thisSchool.Name)</div>
+            @foreach(Guid schoolGuid in userPermissions.SchoolGUIDs)
+            {
+                @if (schoolsByID.ContainsKey(schoolGuid)) {
+                    School thisSchool = schoolsByID[schoolGuid];
+                    List<SubEvent> active = _subEventService.GetActive(thisSchool).ToList();
+                    List<SubEvent> upcoming = _subEventService.GetUpcoming(thisSchool).ToList();
+                    List<SubEvent> combined = new List<SubEvent>();
+                    combined.AddRange(active);
+                    combined.AddRange(upcoming);
+
+                    @if(combined.Count > 0)
+                    {
+                        <h2>@(thisSchool.Name)</h2>
+
+                        <SubEventTable Events="@(combined)" />
+                        <br/><br/><br/>
                     }
+
                 }
-                </div>
-            </div>
-
-            <br/><br/><br/>
-            <div class="main_nav_container">
-            @if (_permissionsManager?.CanManageSchoolList(context?.User) ?? false)
-            {
-                <a class="menu_link" href="/ManageSchools">
-                    <div class="main_nav_button">
-                        <div class="main_nav_button_icon"><img src="/img/school.svg"></div>
-                        <div class="main_nav_button_text">Manage school list</div>
-                    </div>
-                </a>
             }
 
-            @if (_permissionsManager?.CanManageSubList(context?.User) ?? false)
-            {
-                <a class="menu_link" href="/ManageSubList">
-                    <div class="main_nav_button">
-                        <div class="main_nav_button_icon"><img src="/img/list-check.svg"></div>
-                        <div class="main_nav_button_text">Manage sub list</div>
-                    </div>
-                </a>
-            }   
-            
-            @if (_permissionsManager?.CanManagePermissions(context?.User) ?? false)
-            {
-                <a class="menu_link" href="/ManagePermissions">
-                    <div class="main_nav_button">
-                        <div class="main_nav_button_icon"><img src="/img/security.svg"></div>
-                        <div class="main_nav_button_text">Manage permissions</div>
-                    </div>
-                </a>
-            }
-
-            </div>
-            
-            <br/>    
+            <br/><br/>
 
 
         </div>
+
+            <br/><br/><br/>
+            
 
      </Authorized>
      <NotAuthorized>

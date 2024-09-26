@@ -146,14 +146,13 @@
 <AuthorizeView>
      <Authorized Context="AuthorizedUser">
         <div class="page_container">
-            <h1>Sub notifications</h1>
+            <h1>Notify of an upcoming sub</h1>            
             <a href="/">Back to home</a>
             <br/><br/><br/>
 
 
             @if (selectedSchool != null)
-            {
-               <h2>Notify SIS team of an upcoming substitute secretary</h2>
+            {               
                 <p>Use this form to notify the SIS team of a substitute secretary for your school.</p>
 
                 <br/><br/>
@@ -230,7 +229,8 @@
 
                         <div class="row form-group">
                             <div class="col-3 col-form-label">
-                                <label for="subGUID">Which secretary is away?: </label>
+                                <label for="subGUID">Which secretary will be away?: </label><br/>
+                                <div style="font-size: 70%; font-style: italic;">For schools with multiple secretaries. Optional.</div>
                             </div>
                             <div class="col-9">                                
                                 <InputText id="notes" class="form-control" @bind-Value="@newSubEvent.SubstituteFor"></InputText>
@@ -241,7 +241,8 @@
 
                         <div class="row form-group">
                             <div class="col-3 col-form-label">
-                                <label for="subGUID">Additional notes: </label>
+                                <label for="subGUID">Additional notes: </label><br/>
+                                <div style="font-size: 70%; font-style: italic;">Any additional information that may be relevant. Optional.</div>
                             </div>
                             <div class="col-9">                                
                                 <InputTextArea id="notes" class="form-control" @bind-Value="@newSubEvent.Notes"></InputTextArea>
@@ -284,14 +285,14 @@
                 @if(activeSubs.Count > 0)
                 {
                     <br/><br/><br/><br/>
-                    <h2>Active subsitutes</h2>
+                    <h2>Active subsitutes for @(selectedSchool.Name)</h2>
                     <SubEventTable Events="@(activeSubs)" />
                 }
 
                 @if(upcomingSubs.Count > 0)
                 {
                     <br/><br/><br/><br/>
-                    <h2>Upcoming substitutes</h2>
+                    <h2>Upcoming substitutes for @(selectedSchool.Name)</h2>
                     <SubEventTable Events="@(upcomingSubs)" />
                 }
 

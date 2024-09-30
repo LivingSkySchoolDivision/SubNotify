@@ -25,6 +25,9 @@ jobs:
           - dockerfile: src/Dockerfile-FrontEnd
             image: ghcr.io/livingskyschooldivision/subnotify-frontend
             context: ./src/
+          - dockerfile: src/Dockerfile-Notifier
+            image: ghcr.io/livingskyschooldivision/subnotify-notifier
+            context: ./src/
     permissions:
       contents: read
       packages: write

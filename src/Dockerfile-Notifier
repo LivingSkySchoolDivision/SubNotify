@@ -1,0 +1,24 @@
+#See https://aka.ms/containerfastmode to understand how Visual Studio uses this Dockerfile to build your images for faster debugging.
+
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+WORKDIR /app
+EXPOSE 80
+EXPOSE 443
+
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
+COPY ["SubNotify.Notifier/SubNotify.Notifier.csproj", "SubNotify.Notifier/"]
+COPY ["SubNotify.Core/SubNotify.Core.csproj", "SubNotify.Core/"]
+COPY ["LSSD.MongoDB/LSSD.MongoDB.csproj", "LSSD.MongoDB/"]
+RUN dotnet restore "SubNotify.Notifier/SubNotify.Notifier.csproj"
+COPY . .
+WORKDIR "/src/SubNotify.Notifier"
+RUN dotnet build "SubNotify.Notifier.csproj" -c Release -o /app/build
+
+FROM build AS publish
+RUN dotnet publish "SubNotify.Notifier.csproj" -c Release -o /app/publish
+
+FROM base AS final
+WORKDIR /app
+COPY --from=publish /app/publish .
+ENTRYPOINT ["dotnet", "SubNotify.Notifier.dll"]

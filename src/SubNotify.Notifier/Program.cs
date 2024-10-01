@@ -35,10 +35,17 @@ namespace SubNotify.Notifier
             string jira_username = configuration["Settings:JiraUsername"] ?? string.Empty;
             string jira_api_key = configuration["Settings:JiraAPIKey"] ?? string.Empty;
             string jira_domain = configuration["Settings:JiraDomain"] ?? string.Empty;
+            string jira_projectid = configuration["Settings:JiraProjectID"] ?? string.Empty;
+            string jira_issue_type_id = configuration["Settings:JiraIssueTypeID"] ?? string.Empty;
 
-            // 
+            // Dump some settings to console so we know it's working
+            Console.WriteLine($"Jira user: {jira_username}");
+            Console.WriteLine($"Jira domain: {jira_domain}");
+            Console.WriteLine($"Jira project: {jira_projectid}");
+            Console.WriteLine($"Jira issue type: {jira_issue_type_id}");
+            Console.WriteLine($"Timezone: {timeZone}");
 
-            JiraAPI Jira = new JiraAPI(jira_username, jira_api_key, jira_domain);
+            JiraAPI Jira = new JiraAPI(jira_username, jira_api_key, jira_domain, jira_projectid, jira_issue_type_id);
 
             while (true)
             {

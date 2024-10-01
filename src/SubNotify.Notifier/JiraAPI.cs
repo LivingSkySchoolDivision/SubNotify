@@ -16,15 +16,17 @@ namespace SubNotify.Notifier
         private string _APIKey;
         private string _JiraDomain;
         private const string _user_agent = "LSKYSD SubNotify 1.0";
-        private const string _jira_project_id = "10025"; // https://lssd202.atlassian.net/rest/api/2/issue/createmeta
-        private const string _jira_issue_type_id = "10027"; // https://lssd202.atlassian.net/rest/api/3/issuetype
+        private string _jira_project_id = "10025"; // https://lssd202.atlassian.net/rest/api/2/issue/createmeta
+        private string _jira_issue_type_id = "10027"; // https://lssd202.atlassian.net/rest/api/3/issuetype
 
 
-        public JiraAPI(string Username, string APIKey, string JiraDomain)
+        public JiraAPI(string Username, string APIKey, string JiraDomain, string DestinationProjectID, string DestinationIssueTypeID)
         {
             this._username = Username;
             this._APIKey = APIKey;
             this._JiraDomain = JiraDomain;
+            this._jira_issue_type_id = DestinationIssueTypeID;
+            this._jira_project_id = DestinationProjectID;
 
             this._sharedHTTPClient = new()
             {
@@ -97,7 +99,7 @@ namespace SubNotify.Notifier
         }
 
         
-        private static string CreateNotificationText_Onboard(SubEvent SubEvent)
+        private string CreateNotificationText_Onboard(SubEvent SubEvent)
         {
             StringBuilder rawJSON = new StringBuilder();
 
@@ -157,7 +159,7 @@ namespace SubNotify.Notifier
             return rawJSON.ToString();
         }
 
-        private static string CreateNotificationText_Offboard(SubEvent SubEvent)
+        private string CreateNotificationText_Offboard(SubEvent SubEvent)
         {
             StringBuilder rawJSON = new StringBuilder();
 
@@ -216,7 +218,6 @@ namespace SubNotify.Notifier
 
             return rawJSON.ToString();
         }
-
 
         private async Task<bool> CreateJiraIssue(string rawJSON)
         {

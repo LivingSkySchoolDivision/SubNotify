@@ -123,16 +123,6 @@
 
                         <br/>
                         <div class="row">
-                            <div class="col-sm-3"><b>Email / UPN</b><div class="small">For informational purposes only, does not impact logins to this system.</div></div>
-                            <div class="col-sm-6">
-                                <InputText @bind-Value="sub.Email" class="form-control" />
-                                <ValidationMessage For="@(() => sub.Email)" />
-                            </div>
-                        </div>
-                        <br/>
-
-                        <br/>
-                        <div class="row">
                             <div class="col-sm-3"><b>Description</b><div class="small">Only visible to users who can manage the sub list.</div></div>
                             <div class="col-sm-6">
                                 <InputTextArea @bind-Value="sub.Description" class="form-control" />

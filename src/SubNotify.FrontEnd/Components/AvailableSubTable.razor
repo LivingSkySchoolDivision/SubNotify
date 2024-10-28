@@ -36,7 +36,6 @@
 <thead>
     <tr>
         <th>Display Name</th>
-        <th>Email</th>
         <th>Description</th> 
         <th>IsEnabled</th>       
         @if (@ShowSchoolList)
@@ -57,7 +56,6 @@
         {
             <td style="padding: 5px;border-bottom: 1px solid #C0C0C0;">@(sub.DisplayName)</td>
         }
-        <td style="padding: 5px;border-bottom: 1px solid #C0C0C0;">@(sub.Email)</td>
         <td style="padding: 5px;border-bottom: 1px solid #C0C0C0;">@(sub.Description)</td>
         <td style="padding: 5px;border-bottom: 1px solid #C0C0C0;">@(sub.IsEnabled ? "✅" : "⛔")</td>
         @if (@ShowSchoolList)

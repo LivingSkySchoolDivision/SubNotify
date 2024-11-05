@@ -77,6 +77,11 @@ namespace SubNotify.Notifier
 
         private static string SanitizeJSONValue(string input)
         {
+            if (string.IsNullOrEmpty(input))
+            {
+                return string.Empty;
+            }
+            
             return input.Replace("\"", "\\\"");
         }
 

@@ -66,7 +66,7 @@
                     {                    
                         <h5>@(thisSchool.Name)</h5>
                         <ul>
-                            @foreach(AvailableSub sub in _subRepo.GetEnabled())
+                            @foreach(AvailableSub sub in _subRepo.GetEnabledForSchoolGUID(thisSchool.Id))
                             {
                                 <li>@sub.DisplayName</li>                              
                             }                        

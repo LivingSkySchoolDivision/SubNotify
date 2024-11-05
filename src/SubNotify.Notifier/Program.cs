@@ -45,6 +45,34 @@ namespace SubNotify.Notifier
             Console.WriteLine($"Jira issue type: {jira_issue_type_id}");
             Console.WriteLine($"Timezone: {timeZone}");
 
+            // Sanity checks
+
+            if (string.IsNullOrEmpty(jira_username)) {
+                Console.WriteLine("Missing jira_username");
+                Environment.Exit(0);
+            }
+
+            if (string.IsNullOrEmpty(jira_domain)) {
+                Console.WriteLine("Missing jira_domain");
+                Environment.Exit(0);
+            }
+
+            if (string.IsNullOrEmpty(jira_projectid)) {
+                Console.WriteLine("Missing jira_projectid");
+                Environment.Exit(0);
+            }
+
+            if (string.IsNullOrEmpty(jira_issue_type_id)) {
+                Console.WriteLine("Missing jira_issue_type_id");
+                Environment.Exit(0);
+            }
+
+            if (string.IsNullOrEmpty(configuration["Settings:TimeZone"])) {
+                Console.WriteLine("Missing timeZone");
+                Environment.Exit(0);
+            }
+                       
+
             JiraAPI Jira = new JiraAPI(jira_username, jira_api_key, jira_domain, jira_projectid, jira_issue_type_id);
 
             while (true)
@@ -66,7 +94,7 @@ namespace SubNotify.Notifier
                         e.TicketCreated_Onboard = await Jira.CreateOnboardingTicket(e);
                         e.LastNotifyTimestamp = DateTime.Now;                        
                         subEventRepo.Update(e);              
-                        Console.WriteLine(e.TicketCreated_Onboard ? "SUCCESS" : "FAILURE");
+                        Console.WriteLine(e.TicketCreated_Onboard ? "SUCCESS" : "FAILURE");                        
                     }
                     Task.Delay(5000).Wait();
 

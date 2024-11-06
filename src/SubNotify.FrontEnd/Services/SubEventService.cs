@@ -49,12 +49,12 @@ namespace SubNotify.FrontEnd.Services
 
         public List<SubEvent> GetUpcoming(School school)
         {
-            return _repository.Find(x => (x.SchoolGUID == school.Id) && (x.StartDate >= DateTime.Now)).ToList();
+            return _repository.Find(x => (x.SchoolGUID == school.Id) && (x.StartDate >= DateTime.Today.AddDays(1))).ToList();
         }
 
         public List<SubEvent> GetActive(School school) 
         {
-            return _repository.Find(x => (x.SchoolGUID == school.Id) && (x.EndDate >= DateTime.Now) && (x.StartDate <= DateTime.Now)).ToList();
+            return _repository.Find(x => (x.SchoolGUID == school.Id) && (x.EndDate >= DateTime.Today) && (x.StartDate <= DateTime.Today.AddHours(23).AddMinutes(59))).ToList();
         }
     }
 }

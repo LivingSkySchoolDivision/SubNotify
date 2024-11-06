@@ -112,7 +112,7 @@ namespace SubNotify.Notifier
             rawJSON.Append($" \"project\": {{ \"id\": \"{_jira_project_id}\" }},");
             rawJSON.Append($" \"issuetype\": {{ \"id\": \"{_jira_issue_type_id}\" }},");
             rawJSON.Append($" \"duedate\": \"{SubEvent.StartDate.ToString("yyyy-MM-d")}\", ");
-            rawJSON.Append($" \"summary\": \"SubSecretary ONBOARD - {SubEvent.StartDate.ToShortDateString()} to {SubEvent.EndDate.ToShortDateString()} - {SubEvent.SchoolName}\",");
+            rawJSON.Append($" \"summary\": \"SubSecretary ONBOARD - {SubEvent.StartDate.ToShortDateString()} to {SubEvent.EndDate.ToShortDateString()} - {SubEvent.SchoolName} - {SubEvent.SubName}\",");
                     
             rawJSON.Append("""            
                     "description": {
@@ -172,7 +172,7 @@ namespace SubNotify.Notifier
             rawJSON.Append($" \"project\": {{ \"id\": \"{_jira_project_id}\" }},");
             rawJSON.Append($" \"issuetype\": {{ \"id\": \"{_jira_issue_type_id}\" }},");
             rawJSON.Append($" \"duedate\": \"{SubEvent.EndDate.ToString("yyyy-MM-d")}\", ");
-            rawJSON.Append($" \"summary\": \"SubSecretary OFFBOARD - {SubEvent.StartDate.ToShortDateString()} to {SubEvent.EndDate.ToShortDateString()} - {SubEvent.SchoolName}\",");
+            rawJSON.Append($" \"summary\": \"SubSecretary OFFBOARD - {SubEvent.StartDate.ToShortDateString()} to {SubEvent.EndDate.ToShortDateString()} - {SubEvent.SchoolName} - {SubEvent.SubName}\",");
                     
             rawJSON.Append("""            
                     "description": {

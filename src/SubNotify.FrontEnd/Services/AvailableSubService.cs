@@ -21,12 +21,12 @@ namespace SubNotify.FrontEnd.Services
 
         public IEnumerable<AvailableSub> GetAll()
         {
-            return _repository.GetAll();
+            return _repository.GetAll().OrderBy(x => x.DisplayName);
         }
 
         public IEnumerable<AvailableSub> GetEnabled()
         {
-            return _repository.GetAll().Where(x => x.IsEnabled == true);
+            return _repository.GetAll().Where(x => x.IsEnabled == true).OrderBy(x => x.DisplayName);
         }
 
         public void Update(AvailableSub obj)
@@ -54,7 +54,7 @@ namespace SubNotify.FrontEnd.Services
 
         public List<AvailableSub> GetEnabledForSchoolGUID(Guid schoolGuid)
         {
-            return this.GetEnabled().Where(x => x.IsEnabled).Where(x => x.SchoolGUIDs.Contains(schoolGuid)).ToList();
+            return this.GetEnabled().Where(x => x.IsEnabled).Where(x => x.SchoolGUIDs.Contains(schoolGuid)).OrderBy(x => x.DisplayName).ToList();
         }
     }
 }

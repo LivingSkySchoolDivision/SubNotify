@@ -65,8 +65,8 @@
 
             // Build out defaults for new event
             newSubEvent = new SubEvent() {
-                StartDate = DateTime.Today.AddDays(1),
-                EndDate = DateTime.Today.AddDays(1),
+                StartDate = DateTime.Today,
+                EndDate = DateTime.Today,
                 SubNeedsAccessToEmail = true,
                 RequestedTimestampUTC = DateTime.Now,
                 SchoolGUID = selectedSchool.Id,

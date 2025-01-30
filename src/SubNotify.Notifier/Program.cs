@@ -82,7 +82,7 @@ namespace SubNotify.Notifier
 
                 // Load any events that need an onboarding ticket created
                 // Load any events that need an offboarding ticket created
-                List<SubEvent> subEvents = subEventRepo.Find(x => (x.TicketCreated_Onboard == false) || (x.TicketCreated_Offboard == false)).ToList<SubEvent>();
+                List<SubEvent> subEvents = subEventRepo.Find(x => ((x.IsCancelled != true) && (x.TicketCreated_Onboard == false) || (x.TicketCreated_Offboard == false))).ToList<SubEvent>();
 
                 Console.WriteLine($"{DateTime.Now.ToString("yyyy-MM-dd-HH:mm:ss")} Found {subEvents.Count} events to notify for...");
                 if (subEvents.Count > 0) 

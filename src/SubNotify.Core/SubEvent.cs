@@ -19,26 +19,28 @@ public class SubEvent : IGUIDable
     public bool TicketCreated_Offboard { get; set; } = false;
     public DateTime LastNotifyTimestamp { get; set; }
     public string Notes { get;set ;}
+    public bool IsCancelled { get; set; } 
 
     public override string ToString()
     {
         string returnMe = @"
-    { 
-        Id: " + this.Id.ToString() + @" 
-        RequestedTimestamp: " + this.RequestedTimestampUTC + @"
-        Start: " + this.StartDate.ToLongDateString() + @"
-        End: " + this.EndDate.ToLongDateString() + @"
-        RequestorOID: " + this.RequestorOID.ToString() + @"
-        RequestorName: " + this.RequestorName + @"
-        RequestorEmail: " + this.RequestorEmail + @"
-        SubGUID: " + this.SubGUID.ToString() + @"
-        SubName: " + this.SubName + @"
-        SchoolGUID: " + this.SchoolGUID.ToString() + @"
-        SchoolName: " + this.SchoolName + @"
-        NeedEmailAccess: " + this.SubNeedsAccessToEmail + @"
-        TicketCreated_Onboard: " + this.TicketCreated_Onboard + @"
-        TicketCreated_Offboard: " + this.TicketCreated_Offboard + @"
-    }
+            { 
+                Id: " + this.Id.ToString() + @" 
+                IsCancelled: " + this.IsCancelled + @"
+                RequestedTimestamp: " + this.RequestedTimestampUTC + @"
+                Start: " + this.StartDate.ToLongDateString() + @"
+                End: " + this.EndDate.ToLongDateString() + @"
+                RequestorOID: " + this.RequestorOID.ToString() + @"
+                RequestorName: " + this.RequestorName + @"
+                RequestorEmail: " + this.RequestorEmail + @"
+                SubGUID: " + this.SubGUID.ToString() + @"
+                SubName: " + this.SubName + @"
+                SchoolGUID: " + this.SchoolGUID.ToString() + @"
+                SchoolName: " + this.SchoolName + @"
+                NeedEmailAccess: " + this.SubNeedsAccessToEmail + @"
+                TicketCreated_Onboard: " + this.TicketCreated_Onboard + @"
+                TicketCreated_Offboard: " + this.TicketCreated_Offboard + @"
+            }
             ";
 
         return returnMe;

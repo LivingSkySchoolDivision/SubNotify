@@ -80,6 +80,7 @@ namespace SubNotify.Notifier
                 // It might not be the same day depending on what time it is.
                 DateTime currentLocalTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, timeZone);
 
+
                 // Window to look for events
                 DateTime startOfTodayLocalTime = new DateTime(currentLocalTime.Year, currentLocalTime.Month, currentLocalTime.Day, 0,0,0, DateTimeKind.Unspecified);
                 DateTime endOfTodayLocalTime = new DateTime(currentLocalTime.Year, currentLocalTime.Month, currentLocalTime.Day, 23, 59, 59, DateTimeKind.Unspecified);
@@ -104,14 +105,21 @@ namespace SubNotify.Notifier
                 } 
                 Console.WriteLine("-----------------------------------");
                 Console.WriteLine("Starting check for notifications...");
-                Console.WriteLine($"UTC time is: " + DateTime.UtcNow.ToLongDateString() + " " + DateTime.UtcNow.ToLongTimeString());
-                Console.WriteLine($"Local time is: " + currentLocalTime.ToLongDateString() + " " + currentLocalTime.ToLongTimeString());
-                Console.WriteLine($"Start of local day is (Local time): " + startOfTodayLocalTime.ToLongDateString() + " " + startOfTodayLocalTime.ToLongTimeString());
-                Console.WriteLine($"End of local day is (Local time): " + endOfTodayLocalTime.ToLongDateString() + " " + endOfTodayLocalTime.ToLongTimeString());
-                Console.WriteLine($"Start of UTC day is (UTC): " + startOfTodayConvertedToUTC.ToLongDateString() + " " + startOfTodayConvertedToUTC.ToLongTimeString());
-                Console.WriteLine($"End of UTC day is (UTC): " + endOfTodayConvertedToUTC.ToLongDateString() + " " + endOfTodayConvertedToUTC.ToLongTimeString());
-                Console.WriteLine($"Start of Notification window is (UTC): " + startOfTodayConvertedToUTC.ToLongDateString() + " " + startOfTodayConvertedToUTC.ToLongTimeString());
-                Console.WriteLine($"End of Notification window is (UTC): " + endOfTodayConvertedToUTC.ToLongDateString() + " " + endOfTodayConvertedToUTC.ToLongTimeString());
+                Console.WriteLine($"Current UTC time is  (Should be offset): " + DateTime.UtcNow.ToLongDateString() + " " + DateTime.UtcNow.ToLongTimeString());
+                Console.WriteLine($"Local timezone is: {timeZone}");                
+                Console.WriteLine($"Current local time is: " + currentLocalTime.ToLongDateString() + " " + currentLocalTime.ToLongTimeString());                
+                Console.WriteLine($"Start of local day is (Local time) (Should be midnight): " + startOfTodayLocalTime.ToLongDateString() + " " + startOfTodayLocalTime.ToLongTimeString());
+                Console.WriteLine($"End of local day is (Local time) (Should be 1 minute before midnight): " + endOfTodayLocalTime.ToLongDateString() + " " + endOfTodayLocalTime.ToLongTimeString());
+
+                Console.WriteLine($"Start of day converted to UTC (UTC) (Should be offset): " + startOfTodayConvertedToUTC.ToLongDateString() + " " + startOfTodayConvertedToUTC.ToLongTimeString());
+                Console.WriteLine($"End of day converted to UTC (UTC) (Should be offset): " + endOfTodayConvertedToUTC.ToLongDateString() + " " + endOfTodayConvertedToUTC.ToLongTimeString());
+
+
+                Console.WriteLine($"Start of Notification window is (Local): " + startNotificationWindowLocal.ToLongDateString() + " " + startNotificationWindowLocal.ToLongTimeString());
+                Console.WriteLine($"End of Notification window is (Local): " + endNotificationWindowLocal.ToLongDateString() + " " + endNotificationWindowLocal.ToLongTimeString());
+
+                Console.WriteLine($"Start of Notification window is (UTC) (Should be offset): " + startNotificationWindowUTC.ToLongDateString() + " " + startNotificationWindowUTC.ToLongTimeString());
+                Console.WriteLine($"End of Notification window is (UTC) (Should be offset): " + endNotificationWindowUTC.ToLongDateString() + " " + endNotificationWindowUTC.ToLongTimeString());
 
                 // Get any sub events that happen to fall between the two converted dates, that haven't been processed yet
                 MongoRepository<SubEvent> subEventRepo = new MongoRepository<SubEvent>(mongoDatabase);

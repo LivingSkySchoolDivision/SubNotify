@@ -92,16 +92,6 @@ namespace SubNotify.Notifier
                 DateTime startNotificationWindowUTC = TimeZoneInfo.ConvertTimeToUtc(startNotificationWindowLocal);
                 DateTime endNotificationWindowUTC = TimeZoneInfo.ConvertTimeToUtc(endNotificationWindowLocal);
 
-                if (!(
-                    (DateTime.UtcNow >= startNotificationWindowUTC) && 
-                    (DateTime.UtcNow <= endNotificationWindowUTC)
-                    ))
-                {                    
-                    // Sleep until the next check
-                    Console.WriteLine($"{DateTime.Now.ToString("yyyy-MM-dd-HH:mm:ss")}: Outside notification window - sleeping for {_sleepMinutes} minutes...");
-                    Task.Delay(_sleepMinutes * 60 * 1000).Wait();
-                    continue;
-                } 
                 Console.WriteLine("-----------------------------------");
                 Console.WriteLine("Starting check for notifications...");
                 Console.WriteLine($"UTC time is: " + DateTime.UtcNow.ToLongDateString() + " " + DateTime.UtcNow.ToLongTimeString());
@@ -113,6 +103,17 @@ namespace SubNotify.Notifier
                 Console.WriteLine($"Start of Notification window is (UTC): " + startOfTodayConvertedToUTC.ToLongDateString() + " " + startOfTodayConvertedToUTC.ToLongTimeString());
                 Console.WriteLine($"End of Notification window is (UTC): " + endOfTodayConvertedToUTC.ToLongDateString() + " " + endOfTodayConvertedToUTC.ToLongTimeString());
 
+                if (!(
+                    (DateTime.UtcNow >= startNotificationWindowUTC) && 
+                    (DateTime.UtcNow <= endNotificationWindowUTC)
+                    ))
+                {                    
+                    // Sleep until the next check
+                    Console.WriteLine($"{DateTime.Now.ToString("yyyy-MM-dd-HH:mm:ss")}: Outside notification window - sleeping for {_sleepMinutes} minutes...");
+                    Task.Delay(_sleepMinutes * 60 * 1000).Wait();
+                    continue;
+                } 
+                
                 // Get any sub events that happen to fall between the two converted dates, that haven't been processed yet
                 MongoRepository<SubEvent> subEventRepo = new MongoRepository<SubEvent>(mongoDatabase);
                 List<SubEvent> subEvents = subEventRepo.Find(x => 

@@ -102,12 +102,16 @@ namespace SubNotify.Notifier
                     Task.Delay(_sleepMinutes * 60 * 1000).Wait();
                     continue;
                 } 
-
-                //Console.WriteLine($"Local time is: " + currentLocalTime.ToLongDateString() + " " + currentLocalTime.ToLongTimeString());
-                //Console.WriteLine($"Start of local day is: " + startOfTodayLocalTime.ToLongDateString() + " " + startOfTodayLocalTime.ToLongTimeString());
-                //Console.WriteLine($"End of local day is: " + endOfTodayLocalTime.ToLongDateString() + " " + endOfTodayLocalTime.ToLongTimeString());
-                //Console.WriteLine($"Start of UTC day is: " + startOfTodayConvertedToUTC.ToLongDateString() + " " + startOfTodayConvertedToUTC.ToLongTimeString());
-                //Console.WriteLine($"End of UTC day is: " + endOfTodayConvertedToUTC.ToLongDateString() + " " + endOfTodayConvertedToUTC.ToLongTimeString());
+                Console.WriteLine("-----------------------------------");
+                Console.WriteLine("Starting check for notifications...");
+                Console.WriteLine($"UTC time is: " + DateTime.UtcNow.ToLongDateString() + " " + DateTime.UtcNow.ToLongTimeString());
+                Console.WriteLine($"Local time is: " + currentLocalTime.ToLongDateString() + " " + currentLocalTime.ToLongTimeString());
+                Console.WriteLine($"Start of local day is (Local time): " + startOfTodayLocalTime.ToLongDateString() + " " + startOfTodayLocalTime.ToLongTimeString());
+                Console.WriteLine($"End of local day is (Local time): " + endOfTodayLocalTime.ToLongDateString() + " " + endOfTodayLocalTime.ToLongTimeString());
+                Console.WriteLine($"Start of UTC day is (UTC): " + startOfTodayConvertedToUTC.ToLongDateString() + " " + startOfTodayConvertedToUTC.ToLongTimeString());
+                Console.WriteLine($"End of UTC day is (UTC): " + endOfTodayConvertedToUTC.ToLongDateString() + " " + endOfTodayConvertedToUTC.ToLongTimeString());
+                Console.WriteLine($"Start of Notification window is (UTC): " + startOfTodayConvertedToUTC.ToLongDateString() + " " + startOfTodayConvertedToUTC.ToLongTimeString());
+                Console.WriteLine($"End of Notification window is (UTC): " + endOfTodayConvertedToUTC.ToLongDateString() + " " + endOfTodayConvertedToUTC.ToLongTimeString());
 
                 // Get any sub events that happen to fall between the two converted dates, that haven't been processed yet
                 MongoRepository<SubEvent> subEventRepo = new MongoRepository<SubEvent>(mongoDatabase);

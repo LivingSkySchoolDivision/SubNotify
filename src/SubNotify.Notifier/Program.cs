@@ -83,14 +83,14 @@ namespace SubNotify.Notifier
                 // Window to look for events
                 DateTime startOfTodayLocalTime = new DateTime(currentLocalTime.Year, currentLocalTime.Month, currentLocalTime.Day, 0,0,0, DateTimeKind.Unspecified);
                 DateTime endOfTodayLocalTime = new DateTime(currentLocalTime.Year, currentLocalTime.Month, currentLocalTime.Day, 23, 59, 59, DateTimeKind.Unspecified);
-                DateTime startOfTodayConvertedToUTC = TimeZoneInfo.ConvertTimeToUtc(startOfTodayLocalTime);
-                DateTime endOfTodayConvertedToUTC = TimeZoneInfo.ConvertTimeToUtc(endOfTodayLocalTime);
+                DateTime startOfTodayConvertedToUTC = TimeZoneInfo.ConvertTime(startOfTodayLocalTime, TimeZoneInfo.Utc);
+                DateTime endOfTodayConvertedToUTC = TimeZoneInfo.ConvertTime(endOfTodayLocalTime, TimeZoneInfo.Utc);
                 
                 // Window to notify
                 DateTime startNotificationWindowLocal = new DateTime(currentLocalTime.Year, currentLocalTime.Month, currentLocalTime.Day, 5,0,0, DateTimeKind.Unspecified);
                 DateTime endNotificationWindowLocal = new DateTime(currentLocalTime.Year, currentLocalTime.Month, currentLocalTime.Day, 17, 0, 0, DateTimeKind.Unspecified);
-                DateTime startNotificationWindowUTC = TimeZoneInfo.ConvertTimeToUtc(startNotificationWindowLocal);
-                DateTime endNotificationWindowUTC = TimeZoneInfo.ConvertTimeToUtc(endNotificationWindowLocal);
+                DateTime startNotificationWindowUTC = TimeZoneInfo.ConvertTime(startNotificationWindowLocal, TimeZoneInfo.Utc);
+                DateTime endNotificationWindowUTC = TimeZoneInfo.ConvertTime(endNotificationWindowLocal, TimeZoneInfo.Utc);
 
                 if (!(
                     (DateTime.UtcNow >= startNotificationWindowUTC) && 

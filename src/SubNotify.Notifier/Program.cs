@@ -96,14 +96,17 @@ namespace SubNotify.Notifier
                 Console.WriteLine("-----------------------------------");
                 Console.WriteLine("Starting check for notifications...");
                 Console.WriteLine($"Current UTC time is  (Should be offset): " + DateTime.UtcNow.ToLongDateString() + " " + DateTime.UtcNow.ToLongTimeString());
-                Console.WriteLine($"Local timezone is: {timeZone}");                
+                Console.WriteLine($"Local timezone is: {timeZone}");
+                Console.WriteLine("Current timezone offset from UTC: " + timeZone.BaseUtcOffset);
+                
+                             
                 Console.WriteLine($"Current local time is: " + currentLocalTime.ToLongDateString() + " " + currentLocalTime.ToLongTimeString());                
                 Console.WriteLine($"Start of local day is (Local time) (Should be midnight): " + startOfTodayLocalTime.ToLongDateString() + " " + startOfTodayLocalTime.ToLongTimeString());
                 Console.WriteLine($"End of local day is (Local time) (Should be 1 minute before midnight): " + endOfTodayLocalTime.ToLongDateString() + " " + endOfTodayLocalTime.ToLongTimeString());
 
                 Console.WriteLine($"Start of day converted to UTC (UTC) (Should be offset): " + startOfTodayConvertedToUTC.ToLongDateString() + " " + startOfTodayConvertedToUTC.ToLongTimeString());
                 Console.WriteLine($"End of day converted to UTC (UTC) (Should be offset): " + endOfTodayConvertedToUTC.ToLongDateString() + " " + endOfTodayConvertedToUTC.ToLongTimeString());
-
+                Console.WriteLine("Start of day in UTC manually calculated: " + startOfTodayLocalTime.Add(timeZone.GetUtcOffset(currentLocalTime) * -1).ToLongDateString() + " " + startOfTodayLocalTime.Add(timeZone.GetUtcOffset(currentLocalTime) * -1).ToLongTimeString());
 
                 Console.WriteLine($"Start of Notification window is (Local): " + startNotificationWindowLocal.ToLongDateString() + " " + startNotificationWindowLocal.ToLongTimeString());
                 Console.WriteLine($"End of Notification window is (Local): " + endNotificationWindowLocal.ToLongDateString() + " " + endNotificationWindowLocal.ToLongTimeString());

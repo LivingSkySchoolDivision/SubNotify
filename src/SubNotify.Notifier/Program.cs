@@ -84,14 +84,14 @@ namespace SubNotify.Notifier
                 // Window to look for events
                 DateTime startOfTodayLocalTime = new DateTime(currentLocalTime.Year, currentLocalTime.Month, currentLocalTime.Day, 0,0,0, DateTimeKind.Local);
                 DateTime endOfTodayLocalTime = new DateTime(currentLocalTime.Year, currentLocalTime.Month, currentLocalTime.Day, 23, 59, 59, DateTimeKind.Local);
-                DateTime startOfTodayConvertedToUTC = TimeZoneInfo.ConvertTime(startOfTodayLocalTime, TimeZoneInfo.Utc);
-                DateTime endOfTodayConvertedToUTC = TimeZoneInfo.ConvertTime(endOfTodayLocalTime, TimeZoneInfo.Utc);
+                DateTime startOfTodayConvertedToUTC = startOfTodayLocalTime.Add(timeZone.GetUtcOffset(currentLocalTime) * -1);
+                DateTime endOfTodayConvertedToUTC = endOfTodayLocalTime.Add(timeZone.GetUtcOffset(currentLocalTime) * -1);
                 
                 // Window to notify
                 DateTime startNotificationWindowLocal = new DateTime(currentLocalTime.Year, currentLocalTime.Month, currentLocalTime.Day, 5,0,0, DateTimeKind.Local);
                 DateTime endNotificationWindowLocal = new DateTime(currentLocalTime.Year, currentLocalTime.Month, currentLocalTime.Day, 17, 0, 0, DateTimeKind.Local);
-                DateTime startNotificationWindowUTC = TimeZoneInfo.ConvertTime(startNotificationWindowLocal, TimeZoneInfo.Utc);
-                DateTime endNotificationWindowUTC = TimeZoneInfo.ConvertTime(endNotificationWindowLocal, TimeZoneInfo.Utc);
+                DateTime startNotificationWindowUTC = startNotificationWindowLocal.Add(timeZone.GetUtcOffset(currentLocalTime) * -1);
+                DateTime endNotificationWindowUTC = endNotificationWindowLocal.Add(timeZone.GetUtcOffset(currentLocalTime) * -1);
 
                 Console.WriteLine("-----------------------------------");
                 Console.WriteLine("Starting check for notifications...");
@@ -106,7 +106,6 @@ namespace SubNotify.Notifier
 
                 Console.WriteLine($"Start of day converted to UTC (UTC) (Should be offset): " + startOfTodayConvertedToUTC.ToLongDateString() + " " + startOfTodayConvertedToUTC.ToLongTimeString());
                 Console.WriteLine($"End of day converted to UTC (UTC) (Should be offset): " + endOfTodayConvertedToUTC.ToLongDateString() + " " + endOfTodayConvertedToUTC.ToLongTimeString());
-                Console.WriteLine("Start of day in UTC manually calculated: " + startOfTodayLocalTime.Add(timeZone.GetUtcOffset(currentLocalTime) * -1).ToLongDateString() + " " + startOfTodayLocalTime.Add(timeZone.GetUtcOffset(currentLocalTime) * -1).ToLongTimeString());
 
                 Console.WriteLine($"Start of Notification window is (Local): " + startNotificationWindowLocal.ToLongDateString() + " " + startNotificationWindowLocal.ToLongTimeString());
                 Console.WriteLine($"End of Notification window is (Local): " + endNotificationWindowLocal.ToLongDateString() + " " + endNotificationWindowLocal.ToLongTimeString());

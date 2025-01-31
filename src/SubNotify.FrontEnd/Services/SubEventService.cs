@@ -56,5 +56,28 @@ namespace SubNotify.FrontEnd.Services
         {
             return _repository.Find(x => (x.SchoolGUID == school.Id) && (x.EndDate >= DateTime.Today) && (x.StartDate <= DateTime.Today.AddHours(23).AddMinutes(59))).ToList();
         }
+
+        public void Cancel(SubEvent SubEvent)
+        {
+            SubEvent.IsCancelled = true;
+            Update(SubEvent);
+        }
+
+        public void UnCancel(SubEvent SubEvent)
+        {
+            SubEvent.IsCancelled = true;
+            Update(SubEvent);
+        }
+
+        public void CancelUnCancelToggle(SubEvent SubEvent)
+        {
+            if (SubEvent.IsCancelled)
+            {
+                UnCancel(SubEvent);
+            } else {
+                Cancel(SubEvent);
+            }
+        }
+
     }
 }

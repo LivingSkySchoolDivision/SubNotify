@@ -2,6 +2,8 @@
 @using SubNotify.FrontEnd.Services
 @code {
 
+    [Inject]
+    SubEventService _subEventService { get; set; }
 
     [Parameter]
     public List<SubEvent> Events { get; set; }
@@ -9,6 +11,21 @@
     protected override void OnInitialized()
     {        
     }
+
+    protected void OnClick_CancelEvent(SubEvent SubEvent)
+    {
+        SubEvent.IsCancelled = true;
+        _subEventService.Update(SubEvent);
+        
+    }
+
+    protected void OnClick_UnCancelEvent(SubEvent SubEvent)
+    {     
+        SubEvent.IsCancelled = false;
+        _subEventService.Update(SubEvent);
+    }
+
+
 }
 
 <table class="table">
@@ -20,18 +37,35 @@
         <th>Notifier</th> 
         <th style="text-align: center;">Email access</th> 
         <th>Requested on</th> 
+        <th></th>
     </tr>
 </thead>
 
 @foreach(SubEvent subEvent in Events.OrderBy(x => x.StartDate).ThenBy(x => x.EndDate))
-{   
+{       
+    string cancelledCSS = "";
+
+    @if (subEvent.IsCancelled) 
+    {
+        cancelledCSS = "color: #C0C0C0; text-decoration: line-through;";
+    }
+
     <tr>
-        <td style="padding: 5px;border-bottom: 1px solid #C0C0C0;">@(subEvent.StartDate.ToLongDateString())</td>
-        <td style="padding: 5px;border-bottom: 1px solid #C0C0C0;">@(subEvent.EndDate.ToLongDateString())</td>
-        <td style="padding: 5px;border-bottom: 1px solid #C0C0C0;">@(subEvent.SubName)</td>
-        <td style="padding: 5px;border-bottom: 1px solid #C0C0C0;">@(subEvent.RequestorName)</td>
-        <td style="padding: 5px;border-bottom: 1px solid #C0C0C0;text-align: center;">@(subEvent.SubNeedsAccessToEmail ? "✅" : "")</td>
-        <td style="padding: 5px;border-bottom: 1px solid #C0C0C0;">@(subEvent.RequestedTimestampUTC.ToLongDateString())</td>
+        <td style="padding: 5px;border-bottom: 1px solid #C0C0C0; @cancelledCSS">@(subEvent.StartDate.ToLongDateString())</td>
+        <td style="padding: 5px;border-bottom: 1px solid #C0C0C0; @cancelledCSS">@(subEvent.EndDate.ToLongDateString())</td>
+        <td style="padding: 5px;border-bottom: 1px solid #C0C0C0; @cancelledCSS">@(subEvent.SubName)</td>
+        <td style="padding: 5px;border-bottom: 1px solid #C0C0C0; @cancelledCSS">@(subEvent.RequestorName)</td>
+        <td style="padding: 5px;border-bottom: 1px solid #C0C0C0; @cancelledCSS;text-align: center;">@(subEvent.SubNeedsAccessToEmail ? "✅" : "")</td>
+        <td style="padding: 5px;border-bottom: 1px solid #C0C0C0; @cancelledCSS">@(subEvent.RequestedTimestampUTC.ToLongDateString())</td>
+        <td style="padding: 5px;border-bottom: 1px solid #C0C0C0;text-align: center;">
+            @if(subEvent.IsCancelled) 
+            {
+                <b style="color: red;">CANCELLED</b>
+                <button type="button" @onclick="() => OnClick_UnCancelEvent(subEvent)" style="border: 0" class="btn btn-link">Un-Cancel</button>
+            } else {
+                <button type="button" @onclick="() => OnClick_CancelEvent(subEvent)" style="border: 0" class="btn btn-link">Cancel</button>
+            }
+        </td>        
     </tr>
 }
 </table>

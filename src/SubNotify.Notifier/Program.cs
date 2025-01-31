@@ -70,19 +70,56 @@ namespace SubNotify.Notifier
             if (string.IsNullOrEmpty(configuration["Settings:TimeZone"])) {
                 Console.WriteLine("Missing timeZone");
                 Environment.Exit(0);
-            }
-                       
+            } 
 
             JiraAPI Jira = new JiraAPI(jira_username, jira_api_key, jira_domain, jira_projectid, jira_issue_type_id);
 
             while (true)
             {
-                // Load any sub events that have come in that hvae notify set to false
-                MongoRepository<SubEvent> subEventRepo = new MongoRepository<SubEvent>(mongoDatabase);
+                // Figure out what day it is in UTC, given the configured timezone.
+                // It might not be the same day depending on what time it is.
+                DateTime currentLocalTime = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, timeZone);
 
-                // Load any events that need an onboarding ticket created
-                // Load any events that need an offboarding ticket created
-                List<SubEvent> subEvents = subEventRepo.Find(x => ((x.IsCancelled != true) && (x.TicketCreated_Onboard == false) || (x.TicketCreated_Offboard == false))).ToList<SubEvent>();
+                // Window to look for events
+                DateTime startOfTodayLocalTime = new DateTime(currentLocalTime.Year, currentLocalTime.Month, currentLocalTime.Day, 0,0,0, DateTimeKind.Unspecified);
+                DateTime endOfTodayLocalTime = new DateTime(currentLocalTime.Year, currentLocalTime.Month, currentLocalTime.Day, 23, 59, 59, DateTimeKind.Unspecified);
+                DateTime startOfTodayConvertedToUTC = TimeZoneInfo.ConvertTimeToUtc(startOfTodayLocalTime);
+                DateTime endOfTodayConvertedToUTC = TimeZoneInfo.ConvertTimeToUtc(endOfTodayLocalTime);
+                
+                // Window to notify
+                DateTime startNotificationWindowLocal = new DateTime(currentLocalTime.Year, currentLocalTime.Month, currentLocalTime.Day, 5,0,0, DateTimeKind.Unspecified);
+                DateTime endNotificationWindowLocal = new DateTime(currentLocalTime.Year, currentLocalTime.Month, currentLocalTime.Day, 17, 0, 0, DateTimeKind.Unspecified);
+                DateTime startNotificationWindowUTC = TimeZoneInfo.ConvertTimeToUtc(startNotificationWindowLocal);
+                DateTime endNotificationWindowUTC = TimeZoneInfo.ConvertTimeToUtc(endNotificationWindowLocal);
+
+                if (!(
+                    (DateTime.UtcNow >= startNotificationWindowUTC) && 
+                    (DateTime.UtcNow <= endNotificationWindowUTC)
+                    ))
+                {                    
+                    // Sleep until the next check
+                    Console.WriteLine($"{DateTime.Now.ToString("yyyy-MM-dd-HH:mm:ss")}: Outside notification window - sleeping for {_sleepMinutes} minutes...");
+                    Task.Delay(_sleepMinutes * 60 * 1000).Wait();
+                    continue;
+                } 
+
+                //Console.WriteLine($"Local time is: " + currentLocalTime.ToLongDateString() + " " + currentLocalTime.ToLongTimeString());
+                //Console.WriteLine($"Start of local day is: " + startOfTodayLocalTime.ToLongDateString() + " " + startOfTodayLocalTime.ToLongTimeString());
+                //Console.WriteLine($"End of local day is: " + endOfTodayLocalTime.ToLongDateString() + " " + endOfTodayLocalTime.ToLongTimeString());
+                //Console.WriteLine($"Start of UTC day is: " + startOfTodayConvertedToUTC.ToLongDateString() + " " + startOfTodayConvertedToUTC.ToLongTimeString());
+                //Console.WriteLine($"End of UTC day is: " + endOfTodayConvertedToUTC.ToLongDateString() + " " + endOfTodayConvertedToUTC.ToLongTimeString());
+
+                // Get any sub events that happen to fall between the two converted dates, that haven't been processed yet
+                MongoRepository<SubEvent> subEventRepo = new MongoRepository<SubEvent>(mongoDatabase);
+                List<SubEvent> subEvents = subEventRepo.Find(x => 
+                    (x.IsCancelled != true) && 
+                    (x.StartDate >= startOfTodayConvertedToUTC) &&
+                    (x.EndDate <= endOfTodayConvertedToUTC) &&
+                    (
+                        (x.TicketCreated_Onboard == false) || 
+                        (x.TicketCreated_Offboard == false)
+                    )
+                ).ToList<SubEvent>();
 
                 Console.WriteLine($"{DateTime.Now.ToString("yyyy-MM-dd-HH:mm:ss")} Found {subEvents.Count} events to notify for...");
                 if (subEvents.Count > 0) 
@@ -110,9 +147,11 @@ namespace SubNotify.Notifier
                     Task.Delay(5000).Wait();                    
                 }
 
-                // Sleep
+                // Sleep until the next check
                 Console.WriteLine($"{DateTime.Now.ToString("yyyy-MM-dd-HH:mm:ss")}: Sleeping for {_sleepMinutes} minutes...");
                 Task.Delay(_sleepMinutes * 60 * 1000).Wait();
+
+
             }
         }
     }

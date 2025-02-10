@@ -1,0 +1,142 @@
+@page "/Event/{subeventid}"
+@using SubNotify.Core
+@using SubNotify.FrontEnd.Services
+
+@code {
+    [Inject]
+    PermissionsManager? _permissionsManager { get; set; }
+        
+    [Inject]
+    SubEventService? _repo { get; set; }
+    
+    [Inject]
+    NavigationManager? NavigationManager { get; set; }
+
+    [Parameter]
+    public string? subeventid { get; set; }
+    SubEvent? subEvent = null;
+
+    protected override void OnInitialized()
+    {
+        if (subeventid != (new Guid()).ToString()) {
+            subEvent = _repo?.Get(subeventid);
+        } else {
+            subEvent = new SubEvent();
+        }
+    }
+}
+
+
+<AuthorizeView Context="usercontext">
+    <Authorized>
+
+<style type="text/css">
+    .data_table {
+        width: 100%;
+    }
+    .data_table tr {}
+    .data_table td {
+        border: 1px solid #C0C0C0;
+    }
+</style>
+        
+    <div class="page_container">
+    <a href="/">&lt;&nbsp;Back</a><br/><br/>
+
+    @if(subEvent != null) {
+    
+        <table cellpadding=5 cellspacing=5 class="data_table">
+            <tr>
+                <td width="33%"><b>Id</b></td>
+                <td width="66%"><code>@(subEvent.Id)</code></td>
+            </tr>
+        </table>
+        <br/>
+        <table cellpadding=5 cellspacing=5 class="data_table">
+            <tr>
+                <td width="33%"><b>Request Timestamp</b></td>
+                <td width="66%">
+                    <div>@(subEvent.RequestedTimestampUTC.ToLongDateString()) @(subEvent.RequestedTimestampUTC.ToLongTimeString()) (UTC)</div>                    
+                </td>
+            </tr>
+            <tr>
+                <td><b>School GUID</b></td>
+                <td><code>@(subEvent.SchoolGUID)</code></td>
+            </tr>
+            <tr>
+                <td><b>School Name</b></td>
+                <td>@(subEvent.SchoolName)</td>
+            </tr>
+            <tr>
+                <td><b>Start Date</b></td>
+                <td>@(subEvent.StartDate.ToLongDateString()) @(subEvent.StartDate.ToLongTimeString()) (UTC)</td>
+            </tr>
+            <tr>
+                <td><b>End Date</b></td>
+                <td>@(subEvent.EndDate.ToLongDateString()) @(subEvent.EndDate.ToLongTimeString()) (UTC)</td>
+            </tr>
+            <tr>
+                <td><b>Requestor OID</b></td>
+                <td><code>@(subEvent.RequestorOID)</code></td>
+            </tr>
+            <tr>
+                <td><b>Requestor Name</b></td>
+                <td>@(subEvent.RequestorName)</td>
+            </tr>
+            <tr>
+                <td><b>Requestor Email</b></td>
+                <td>@(subEvent.RequestorEmail)</td>
+            </tr>
+            <tr>
+                <td><b>Substitute For</b></td>
+                <td>@(subEvent.SubstituteFor)</td>
+            </tr>
+            <tr>
+                <td><b>Sub GUID</b></td>
+                <td><code>@(subEvent.SubGUID)</code></td>
+            </tr>
+            <tr>
+                <td><b>Sub Name</b></td>
+                <td>@(subEvent.SubName)</td>
+            </tr>
+            <tr>
+                <td><b>Sub Needs Email Access</b></td>
+                <td>@(subEvent.SubNeedsAccessToEmail ? "Yes" : "No")</td>
+            </tr>
+            <tr>
+                <td><b>Notes</b></td>
+                <td>@(subEvent.SchoolName)</td>
+            </tr>
+            <tr>
+                <td><b>Is Cancelled?</b></td>
+                <td>@(subEvent.IsCancelled ? "Yes" : "No")</td>
+            </tr>
+        </table>
+        <br/>
+        <table cellpadding=5 cellspacing=5 class="data_table">
+            <tr>
+                <td width="33%"><b>Onboarding ticket created</b></td>
+                <td width="66%">@(subEvent.TicketCreated_Onboard ? "Yes" : "No")</td>
+            </tr>
+            <tr>
+                <td><b>Offboarding ticket created</b></td>
+                <td>@(subEvent.TicketCreated_Offboard ? "Yes" : "No")</td>
+            </tr>
+            <tr>
+                <td><b>Last Notify Timestamp</b></td>
+                <td>
+                    @if (subEvent.LastNotifyTimestamp > new DateTime(1901, 1, 1)) {
+                        @(subEvent.LastNotifyTimestamp.ToLongDateString() + " " + subEvent.LastNotifyTimestamp.ToLongTimeString() + " (UTC)");
+                    } else {
+                        <i>Not notified</i>
+                    }
+                </td>
+            </tr>
+        </table>
+
+    } else {
+        <i>Object not found</i>
+    }
+</div>
+    </Authorized>
+</AuthorizeView>

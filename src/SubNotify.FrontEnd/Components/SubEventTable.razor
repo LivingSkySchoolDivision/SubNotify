@@ -34,9 +34,8 @@
         <th>From</th>
         <th>To</th>
         <th>Substitute</th>
-        <th>Notifier</th> 
         <th style="text-align: center;">Email access</th> 
-        <th>Requested on</th> 
+        <th></th> 
         <th></th>
     </tr>
 </thead>
@@ -54,9 +53,10 @@
         <td style="padding: 5px;border-bottom: 1px solid #C0C0C0; @cancelledCSS">@(subEvent.StartDate.ToLongDateString())</td>
         <td style="padding: 5px;border-bottom: 1px solid #C0C0C0; @cancelledCSS">@(subEvent.EndDate.ToLongDateString())</td>
         <td style="padding: 5px;border-bottom: 1px solid #C0C0C0; @cancelledCSS">@(subEvent.SubName)</td>
-        <td style="padding: 5px;border-bottom: 1px solid #C0C0C0; @cancelledCSS">@(subEvent.RequestorName)</td>
         <td style="padding: 5px;border-bottom: 1px solid #C0C0C0; @cancelledCSS;text-align: center;">@(subEvent.SubNeedsAccessToEmail ? "✅" : "")</td>
-        <td style="padding: 5px;border-bottom: 1px solid #C0C0C0; @cancelledCSS">@(subEvent.RequestedTimestampUTC.ToLongDateString())</td>
+        <td style="padding: 5px;border-bottom: 1px solid #C0C0C0;">
+            <a href="/Event/@(subEvent.Id)">Details</a>
+        </td>
         <td style="padding: 5px;border-bottom: 1px solid #C0C0C0;text-align: center;">
             @if(subEvent.IsCancelled) 
             {

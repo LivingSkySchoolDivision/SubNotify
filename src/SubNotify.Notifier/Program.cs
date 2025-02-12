@@ -97,7 +97,7 @@ namespace SubNotify.Notifier
                 List<SubEvent> subEvents = subEventRepo.Find(x =>
                     (x.IsCancelled != true) &&
                     (x.StartDate >= startOfTodayConvertedToUTC) &&
-                    (x.EndDate <= endOfTodayConvertedToUTC) &&
+                    (x.StartDate <= endOfTodayConvertedToUTC) &&
                     (
                         (x.TicketCreated_Onboard == false) ||
                         (x.TicketCreated_Offboard == false)

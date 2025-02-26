@@ -82,7 +82,7 @@ namespace SubNotify.Notifier
                 return string.Empty;
             }
             
-            return input.Replace("\"", "\\\"");
+            return input.Replace("\"", "\\\"").Replace("\n", "\\n");
         }
 
         private static List<KeyValuePair<string, string>> ConvertSubEventToKeyValuePair(SubEvent SubEvent)

@@ -224,11 +224,12 @@ namespace SubNotify.Notifier
             return rawJSON.ToString();
         }
 
-        private async Task<bool> CreateJiraIssue(string rawJSON)
+        private async Task<JIRAAPIResult> CreateJiraIssue(string rawJSON, SubEvent SubEvent)
         {
             string _authHeaderContent = Convert.ToBase64String(System.Text.ASCIIEncoding.ASCII.GetBytes($"{this._username}:{this._APIKey}"));
             _sharedHTTPClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", _authHeaderContent);
             StringContent jsonRequestContent = new StringContent(rawJSON.ToString(), Encoding.UTF8, "application/json");
+
             HttpRequestMessage request = new HttpRequestMessage
             {
                 Method = HttpMethod.Post,
@@ -240,20 +241,31 @@ namespace SubNotify.Notifier
             request.Headers.UserAgent.ParseAdd(_user_agent);
             request.Headers.Add("Accept", "application/json, text/plain");
             var jsonResponse = await _sharedHTTPClient.SendAsync(request);
-            Console.WriteLine(jsonResponse);
-            return jsonResponse.IsSuccessStatusCode;
+
+            // Make a JIRAAPIResult to store the output in
+            JIRAAPIResult result = new JIRAAPIResult() {
+                TimestampUTC = DateTime.UtcNow,
+                SubEventID = SubEvent.Id,
+                RequestJSON = rawJSON,
+                Success = jsonResponse.IsSuccessStatusCode,
+                JSONResponse = await jsonResponse.Content.ReadAsStringAsync()
+            };
+
+            Console.WriteLine(result.JSONResponse);
+
+            return result;
         }
 
-        public async Task<bool> CreateOnboardingTicket(SubEvent SubEvent)
+        public async Task<JIRAAPIResult> CreateOnboardingTicket(SubEvent SubEvent)
         {
             string rawJSON_Onboard = CreateNotificationText_Onboard(SubEvent);
-            return await CreateJiraIssue(rawJSON_Onboard);
+            return await CreateJiraIssue(rawJSON_Onboard, SubEvent);
         }
 
-        public async Task<bool> CreateOffboardingTicket(SubEvent SubEvent)
+        public async Task<JIRAAPIResult> CreateOffboardingTicket(SubEvent SubEvent)
         {
             string rawJSON_OffBoard = CreateNotificationText_Offboard(SubEvent);
-            return await CreateJiraIssue(rawJSON_OffBoard); 
+            return await CreateJiraIssue(rawJSON_OffBoard, SubEvent); 
         }
 
     }

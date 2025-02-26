@@ -8,18 +8,29 @@
         
     [Inject]
     SubEventService? _repo { get; set; }
+
+    [Inject]
+    JIRAAPIResultService? _apiResultService { get; set; }
     
     [Inject]
     NavigationManager? NavigationManager { get; set; }
 
     [Parameter]
     public string? subeventid { get; set; }
+
     SubEvent? subEvent = null;
+
+    List<JIRAAPIResult> APIResults = new List<JIRAAPIResult>();
 
     protected override void OnInitialized()
     {
         if (subeventid != (new Guid()).ToString()) {
             subEvent = _repo?.Get(subeventid);
+            if (_apiResultService != null) {
+                if (subEvent != null) {
+                    APIResults = _apiResultService.GetForSubEvent(subEvent);
+                }
+            }
         } else {
             subEvent = new SubEvent();
         }
@@ -105,7 +116,7 @@
             </tr>
             <tr>
                 <td><b>Notes</b></td>
-                <td>@(subEvent.SchoolName)</td>
+                <td>@(subEvent.Notes)</td>
             </tr>
             <tr>
                 <td><b>Is Cancelled?</b></td>
@@ -133,6 +144,32 @@
                 </td>
             </tr>
         </table>
+
+        @if (APIResults.Count > 0) {
+            <br/><br/>
+            <h2>API Interactions</h2>
+
+            <table class="table">
+
+            <thead>
+            <tr>
+                <th>Success?</th>
+                <th>Timestamp (UTC)</th>
+                <th>Response JSON</th>
+            </tr>
+            </thead>
+
+            @foreach(JIRAAPIResult api_result in APIResults)
+            {
+                <tr style="border-bottom: 1px solid #C0C0C0;">
+                    <td valign="top" align="center">@(api_result.Success ? "✅" : "🔥")</td>
+                    <td valign="top" style="text-wrap: nowrap;">@api_result.TimestampUTC.ToString()</td>
+                    <td valign="top" style="font-size: 10pt;"><pre>@(api_result.JSONResponse)</pre></td>
+                </tr>
+            }
+
+            </table>
+        }
 
     } else {
         <i>Object not found</i>

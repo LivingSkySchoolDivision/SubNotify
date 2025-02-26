@@ -92,6 +92,8 @@ namespace SubNotify.Notifier
                 ConsoleWrite($"Start of search date range (UTC): " + startOfTodayConvertedToUTC.ToLongDateString() + " " + startOfTodayConvertedToUTC.ToLongTimeString());
                 ConsoleWrite($"End of search date range (UTC):   " + endOfTodayConvertedToUTC.ToLongDateString() + " " + endOfTodayConvertedToUTC.ToLongTimeString());
                 
+                MongoRepository<JIRAAPIResult> apiResultRepo = new MongoRepository<JIRAAPIResult>(mongoDatabase);
+
                 // Get any sub events that happen to fall between the two converted dates, that haven't been processed yet
                 MongoRepository<SubEvent> subEventRepo = new MongoRepository<SubEvent>(mongoDatabase);
                 List<SubEvent> subEvents = subEventRepo.Find(x =>
@@ -111,9 +113,11 @@ namespace SubNotify.Notifier
                     foreach(SubEvent e in subEvents.Where(x => x.TicketCreated_Onboard == false))
                     {
                         ConsoleWrite($"{DateTime.Now.ToString("yyyy-MM-dd-HH:mm:ss")} > Creating onboarding ticket for request {e.Id}...");
-                        e.TicketCreated_Onboard = await Jira.CreateOnboardingTicket(e);
-                        e.LastNotifyTimestamp = DateTime.Now;
+                        JIRAAPIResult apiResponse = await Jira.CreateOnboardingTicket(e);
+                        e.TicketCreated_Onboard = apiResponse.Success;
+                        e.LastNotifyTimestamp = DateTime.Now;                        
                         subEventRepo.Update(e);
+                        apiResultRepo.Insert(apiResponse);
                         ConsoleWrite(e.TicketCreated_Onboard ? "SUCCESS" : "FAILURE");
                     }
                     Task.Delay(5000).Wait();
@@ -122,9 +126,11 @@ namespace SubNotify.Notifier
                     foreach(SubEvent e in subEvents.Where(x => x.TicketCreated_Offboard == false))
                     {
                         ConsoleWrite($"{DateTime.Now.ToString("yyyy-MM-dd-HH:mm:ss")} > Creating offboarding ticket for request {e.Id}...");
-                        e.TicketCreated_Offboard = await Jira.CreateOffboardingTicket(e);
+                        JIRAAPIResult apiResponse = await Jira.CreateOffboardingTicket(e);
+                        e.TicketCreated_Offboard = apiResponse.Success;
                         e.LastNotifyTimestamp = DateTime.Now;
                         subEventRepo.Update(e);
+                        apiResultRepo.Insert(apiResponse);
                         ConsoleWrite(e.TicketCreated_Onboard ? "SUCCESS" : "FAILURE");
                     }
                     Task.Delay(5000).Wait();

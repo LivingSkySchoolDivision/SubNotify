@@ -75,6 +75,7 @@ namespace SubNotify.Notifier
             return returnMe.ToString();
         }
 
+        private static readonly string allowedCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ .,/\\?!;:\"'][{}|!@#$%^&*()1234567890-=+_><\n";
         private static string SanitizeJSONValue(string input)
         {
             if (string.IsNullOrEmpty(input))
@@ -82,7 +83,16 @@ namespace SubNotify.Notifier
                 return string.Empty;
             }
             
-            return input.Replace("\"", "\\\"").Replace("\n", "\\n");
+            StringBuilder sanitized = new StringBuilder();
+            foreach(char c in input) 
+            {
+                if (allowedCharacters.Contains(c)) 
+                {
+                    sanitized.Append(c);
+                }
+            }
+
+            return sanitized.ToString().Replace("\"", "\\\"").Replace("\n", "\\n");
         }
 
         private static List<KeyValuePair<string, string>> ConvertSubEventToKeyValuePair(SubEvent SubEvent)

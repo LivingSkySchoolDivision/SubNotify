@@ -15,12 +15,17 @@
     [Inject]
     NavigationManager? NavigationManager { get; set; }
 
+    [Inject]
+    IConfiguration? _configuration { get; set; }
+
     [Parameter]
     public string? subeventid { get; set; }
 
     SubEvent? subEvent = null;
 
     List<JIRAAPIResult> APIResults = new List<JIRAAPIResult>();
+
+    string LocalTimeZone = string.Empty;
 
     protected override void OnInitialized()
     {
@@ -33,6 +38,15 @@
             }
         } else {
             subEvent = new SubEvent();
+        }
+
+        // set the local time zone from configuration
+        if (_configuration != null) 
+        {
+            if (!string.IsNullOrEmpty(_configuration["Settings:TimeZone"])) 
+            {
+                LocalTimeZone = _configuration["Settings:TimeZone"] ?? string.Empty;
+            }
         }
     }
 }
@@ -50,7 +64,7 @@
         border: 1px solid #C0C0C0;
     }
 </style>
-        
+
     <div class="page_container">
     <a href="/">&lt;&nbsp;Back</a><br/><br/>
 
@@ -67,7 +81,7 @@
             <tr>
                 <td width="33%"><b>Request Timestamp</b></td>
                 <td width="66%">
-                    <div>@(subEvent.RequestedTimestampUTC.ToLongDateString()) @(subEvent.RequestedTimestampUTC.ToLongTimeString()) (UTC)</div>                    
+                    <div><dfn title="@(TimeZoneHelper.ConvertUTCToLocalTime(subEvent.RequestedTimestampUTC, LocalTimeZone).ToLongDateString()) @(TimeZoneHelper.ConvertUTCToLocalTime(subEvent.RequestedTimestampUTC, LocalTimeZone).ToLongTimeString()) (UTC)">@(subEvent.RequestedTimestampUTC.ToLongDateString()) @(subEvent.RequestedTimestampUTC.ToLongTimeString()) (@(LocalTimeZone))</dfn></div>                    
                 </td>
             </tr>
             <tr>
@@ -80,11 +94,11 @@
             </tr>
             <tr>
                 <td><b>Start Date</b></td>
-                <td>@(subEvent.StartDate.ToLongDateString()) @(subEvent.StartDate.ToLongTimeString()) (UTC)</td>
+                <td>@(subEvent.StartDate.ToLongDateString())</td>
             </tr>
             <tr>
                 <td><b>End Date</b></td>
-                <td>@(subEvent.EndDate.ToLongDateString()) @(subEvent.EndDate.ToLongTimeString()) (UTC)</td>
+                <td>@(subEvent.EndDate.ToLongDateString())</td>
             </tr>
             <tr>
                 <td><b>Requestor OID</b></td>
@@ -137,7 +151,7 @@
                 <td><b>Last Notify Timestamp</b></td>
                 <td>
                     @if (subEvent.LastNotifyTimestamp > new DateTime(1901, 1, 1)) {
-                        @(subEvent.LastNotifyTimestamp.ToLongDateString() + " " + subEvent.LastNotifyTimestamp.ToLongTimeString() + " (UTC)");
+                        <div><dfn title="@(TimeZoneHelper.ConvertUTCToLocalTime(subEvent.LastNotifyTimestamp, LocalTimeZone).ToLongDateString()) @(TimeZoneHelper.ConvertUTCToLocalTime(subEvent.LastNotifyTimestamp, LocalTimeZone).ToLongTimeString()) (UTC)">@(subEvent.LastNotifyTimestamp.ToLongDateString()) @(subEvent.LastNotifyTimestamp.ToLongTimeString()) (@(LocalTimeZone))</dfn></div>
                     } else {
                         <i>Not notified</i>
                     }
@@ -154,16 +168,16 @@
             <thead>
             <tr>
                 <th>Success?</th>
-                <th>Timestamp (UTC)</th>
+                <th>Timestamp&nbsp;(Local&nbsp;time)</th>
                 <th>Response JSON</th>
             </tr>
             </thead>
 
             @foreach(JIRAAPIResult api_result in APIResults)
             {
-                <tr style="border-bottom: 1px solid #C0C0C0;">
-                    <td valign="top" align="center">@(api_result.Success ? "✅" : "🔥")</td>
-                    <td valign="top" style="text-wrap: nowrap;">@api_result.TimestampUTC.ToString()</td>
+                <tr style="border-bottom: 1px solid #C0C0C0; font-size: 10pt;">
+                    <td valign="middle" align="center">@(api_result.Success ? "✅" : "🔥")</td>
+                    <td valign="middle" style="text-wrap: nowrap;"><div><dfn title="@(TimeZoneHelper.ConvertUTCToLocalTime(@api_result.TimestampUTC, LocalTimeZone).ToLongDateString()) @(TimeZoneHelper.ConvertUTCToLocalTime(@api_result.TimestampUTC, LocalTimeZone).ToLongTimeString()) (UTC)">@(@api_result.TimestampUTC.ToLongDateString()) @(@api_result.TimestampUTC.ToLongTimeString())</dfn></div></td>
                     <td valign="top" style="font-size: 10pt;"><pre>@(api_result.JSONResponse)</pre></td>
                 </tr>
             }

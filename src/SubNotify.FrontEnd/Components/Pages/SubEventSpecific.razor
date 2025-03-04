@@ -81,7 +81,7 @@
             <tr>
                 <td width="33%"><b>Request Timestamp</b></td>
                 <td width="66%">
-                    <div><dfn title="@(TimeZoneHelper.ConvertUTCToLocalTime(subEvent.RequestedTimestampUTC, LocalTimeZone).ToLongDateString()) @(TimeZoneHelper.ConvertUTCToLocalTime(subEvent.RequestedTimestampUTC, LocalTimeZone).ToLongTimeString()) (UTC)">@(subEvent.RequestedTimestampUTC.ToLongDateString()) @(subEvent.RequestedTimestampUTC.ToLongTimeString()) (@(LocalTimeZone))</dfn></div>                    
+                    <div><dfn title="@(subEvent.RequestedTimestampUTC.ToLongDateString()) @(subEvent.RequestedTimestampUTC.ToLongTimeString()) (UTC)">@(TimeZoneHelper.ConvertUTCToLocalTime(subEvent.RequestedTimestampUTC, LocalTimeZone).ToLongDateString()) @(TimeZoneHelper.ConvertUTCToLocalTime(subEvent.RequestedTimestampUTC, LocalTimeZone).ToLongTimeString()) (@(LocalTimeZone))</dfn></div>                    
                 </td>
             </tr>
             <tr>
@@ -151,7 +151,7 @@
                 <td><b>Last Notify Timestamp</b></td>
                 <td>
                     @if (subEvent.LastNotifyTimestamp > new DateTime(1901, 1, 1)) {
-                        <div><dfn title="@(TimeZoneHelper.ConvertUTCToLocalTime(subEvent.LastNotifyTimestamp, LocalTimeZone).ToLongDateString()) @(TimeZoneHelper.ConvertUTCToLocalTime(subEvent.LastNotifyTimestamp, LocalTimeZone).ToLongTimeString()) (UTC)">@(subEvent.LastNotifyTimestamp.ToLongDateString()) @(subEvent.LastNotifyTimestamp.ToLongTimeString()) (@(LocalTimeZone))</dfn></div>
+                        <div><dfn title="@(subEvent.LastNotifyTimestamp.ToLongDateString()) @(subEvent.LastNotifyTimestamp.ToLongTimeString()) (UTC)">@(TimeZoneHelper.ConvertUTCToLocalTime(subEvent.LastNotifyTimestamp, LocalTimeZone).ToLongDateString()) @(TimeZoneHelper.ConvertUTCToLocalTime(subEvent.LastNotifyTimestamp, LocalTimeZone).ToLongTimeString()) (@(LocalTimeZone))</dfn></div>
                     } else {
                         <i>Not notified</i>
                     }

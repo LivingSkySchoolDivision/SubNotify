@@ -55,15 +55,15 @@
         <td style="padding: 5px;border-bottom: 1px solid #C0C0C0; @cancelledCSS">@(subEvent.SubName)</td>
         <td style="padding: 5px;border-bottom: 1px solid #C0C0C0; @cancelledCSS;text-align: center;">@(subEvent.SubNeedsAccessToEmail ? "✅" : "")</td>
         <td style="padding: 5px;border-bottom: 1px solid #C0C0C0;">
-            <a href="/Event/@(subEvent.Id)">Details</a>
+            <a style="text-decoration: none;" href="/Event/@(subEvent.Id)">Details</a>
         </td>
         <td style="padding: 5px;border-bottom: 1px solid #C0C0C0;text-align: center;">
             @if(subEvent.IsCancelled) 
             {
                 <b style="color: red;">CANCELLED</b>
-                <button type="button" @onclick="() => OnClick_UnCancelEvent(subEvent)" style="border: 0" class="btn btn-link">Un-Cancel</button>
+                <button type="button" @onclick="() => OnClick_UnCancelEvent(subEvent)" style="border: 0; color: green; text-decoration: none;" class="btn btn-link">Un-Cancel</button>
             } else {
-                <button type="button" @onclick="() => OnClick_CancelEvent(subEvent)" style="border: 0" class="btn btn-link">Cancel</button>
+                <button type="button" @onclick="() => OnClick_CancelEvent(subEvent)" style="border: 0; color: firebrick; text-decoration: none;" class="btn btn-link">Cancel</button>
             }
         </td>        
     </tr>

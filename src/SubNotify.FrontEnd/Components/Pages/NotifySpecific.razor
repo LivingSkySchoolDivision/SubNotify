@@ -286,7 +286,7 @@
                 @if(activeSubs.Count > 0)
                 {
                     <br/><br/><br/><br/>
-                    <h2>Active subsitutes for @(selectedSchool.Name)</h2>
+                    <h2>Active subsitutes for @(selectedSchool.Name)</h2>                    
                     <SubEventTable Events="@(activeSubs)" />
                 }
 
@@ -294,6 +294,8 @@
                 {
                     <br/><br/><br/><br/>
                     <h2>Upcoming substitutes for @(selectedSchool.Name)</h2>
+                    <div style="font-weight: bold; padding: 7px; border-radius: 5px; border: 2px solid firebrick; color: firebrick;">⚠️ REMINDER:  If you no longer need a request that has been created, please click the CANCEL button.</div>
+                    <br/>
                     <SubEventTable Events="@(upcomingSubs)" />
                 }
 

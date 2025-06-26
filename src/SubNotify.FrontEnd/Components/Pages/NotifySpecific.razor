@@ -116,11 +116,9 @@
     {
         if (newSubEvent != null)
         {
-            
             // Fill in the sub name from the GUID
             foreach(AvailableSub sub in displayedAvailableSubs)
             {
-                
                 if (sub.Id == newSubEvent.SubGUID) 
                 {
                     newSubEvent.SubName = sub.DisplayName;
@@ -218,10 +216,20 @@
 
                         <div class="row form-group">
                             <div class="col-3 col-form-label">
+                                Email mailbox access
                             </div>
                             <div class="col-9">
-                                <InputCheckbox id="blnEmailAccess" class="form-check-input" @bind-Value="@newSubEvent.SubNeedsAccessToEmail"></InputCheckbox>
-                                <label for="blnEmailAccess" class="form-check-label">Sub will need access to the school email mailbox</label>
+                                <InputRadioGroup Name="EmailRadio" @bind-Value="@newSubEvent.SubNeedsAccessToEmail">
+                                    <div class="form-check">
+                                        <InputRadio Name="EmailRadio" Value="@true" class="form-check-input"/>
+                                        <label class="form-check-label">Yes, the sub <b>will</b> need access to the school email</label>
+                                    </div>
+                                    <div class="form-check">
+                                 c       <InputRadio Name="EmailRadio" Value="@false" class="form-check-input"/>
+                                        <label class="form-check-label">No, the sub <b>will not</b> need access to the school email</label>
+                                    </div>
+
+                                </InputRadioGroup>
                             </div>
                         </div>
 
